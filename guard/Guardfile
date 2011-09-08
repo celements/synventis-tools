@@ -1,0 +1,28 @@
+#   This Guardfile is an example. Here we use it to copy changes from the repositories templates and resources folders
+#   to the webapps root. This example also makes use of the "guard-sass" gem to compile the SCSS source on the fly into the directory.
+#
+#   Change the following string to match your tomcat installation like in the example.
+localroot = "/Users/rodrigo/tomcat6/webapps/ROOT"
+
+ignore_paths '.svn'
+
+group 'backend' do
+  # Watch for filechanges on SASS source files and compile them into the CSS folder.
+  guard 'sass', :input => 'resources/stylesheets/sass-sources', :output => 'resources/stylesheets/css-compiled'
+
+  # Watch for any changes in the resources folder and rsync them to the specified destination folder. 
+  guard 'shell' do
+    watch(/resources\/*/) { 
+      puts 'resources rsync...'
+      `rsync --exclude .svn/ -r resources/ #{localroot}/resources/` 
+    }
+  end
+  
+  # Watch for any changes in the templates folder and rsync them to the specified destination folder. 
+  guard 'shell' do
+    watch(/templates\/.*/) { 
+      puts "templates rsync..."
+      `rsync --exclude .svn/ -r templates/ #{localroot}/templates/` 
+    }
+  end
+end
