@@ -24,8 +24,14 @@ while :
 do
   echo
   echo "Executing maven clean install ..."
-  mvn validate clean install &>/dev/null && break
-  read -p "... failure, please fix project! press enter to retry"
+  mvnOut=`mvn validate clean install`
+  mvnSuccess=$?
+  if [ $mvnSuccess -eq 0 ]; then
+    break
+  else
+    echo "$mvnOut" | grep '^\[ERROR\]'
+    read -p "... failure, please fix project! press enter to retry"
+  fi
 done
 echo "... success"
 
