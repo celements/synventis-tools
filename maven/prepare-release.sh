@@ -20,7 +20,8 @@ echo "... done" || die "unable to prepare branch ${BRANCH}"
 
 echo
 echo "Updating pom.xml using latest releases ..."
-mvn versions:use-latest-releases -Dincludes=com.celements:*,ch.programmonline:*,ch.newjobplacement:* \
+mvn versions:use-releases \
+    -Dincludes=com.celements:*,ch.programmonline:*,ch.newjobplacement:* \
     -DprocessParent=true -DgenerateBackupPoms=false && \
 echo "... done" || die "maven versions command failed"
 
