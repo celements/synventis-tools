@@ -1,10 +1,10 @@
 #!/bin/bash
 die() { echo >&2 "failed - $@"; exit 1; }
 
-[ ! -z $1 ] || die "1. argument invalid: branch name" 
+[ -n $1 ] || die "1. argument invalid: branch name" 
 BRANCH=$1
 
-if [ ! -z "$2" ]; then
+if [ -n "$2" ]; then
   cd $2
 fi
 [ -f ./pom.xml ] || die "execute in maven project folder"
