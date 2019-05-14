@@ -1,37 +1,37 @@
 #!/bin/bash
-BRANCH=RELEASE
+die() { echo >&2 "failed - $@"; exit 1; }
 
-if [ ! -z "$1" ]; then
-  cd $1
+[ ! -z $1 ] || die "1. argument invalid: branch name" 
+BRANCH=$1
+
+if [ ! -z "$2" ]; then
+  cd $2
 fi
-[ -f ./pom.xml ] || { echo "execute in maven project folder" && exit 1; }
+[ -f ./pom.xml ] || die "execute in maven project folder"
+
 git checkout dev && git pull
-[ $? ] || { echo "pull failed" && exit 1; }
+[ $? ] || die "unable to pull from git repository, check connection"
 
 echo
 echo "Preparing release branch '${BRANCH}' ..."
 git branch ${BRANCH}
 git checkout ${BRANCH}
-[ $? ] || { echo "failed branch preparation ${BRANCH}" && exit 1; }
-echo "... done"
+echo "... done" || die "unable to prepare branch ${BRANCH}"
 
 echo
-echo "Updating pom.xml ..."
-mvn versions:use-latest-releases -Dincludes=com.celements:*,ch.programmonline:* -DprocessParent=true -DgenerateBackupPoms=false
-echo "... done"
+echo "Updating pom.xml using latest releases ..."
+mvn versions:use-latest-releases -Dincludes=com.celements:*,ch.programmonline:*,ch.newjobplacement:* \
+    -DprocessParent=true -DgenerateBackupPoms=false && \
+echo "... done" || die "maven versions command failed"
 
 while :
 do
   echo
   echo "Executing maven clean install ..."
-  mvnOut=`mvn validate clean install`
-  mvnSuccess=$?
-  if [ $mvnSuccess -eq 0 ]; then
-    break
-  else
-    echo "$mvnOut" | grep '^\[ERROR\]'
-    read -p "... failure, please fix project! press enter to retry"
-  fi
+  MVNOUT=$(mvn validate clean install 2>&1)
+  [ $? ] && break
+  echo $MVNOUT | grep '^\[ERROR\]'
+  read -p "... failure, please fix project! press enter to retry"
 done
 echo "... success"
 
@@ -40,6 +40,7 @@ read -p "Please check pom.xml, press enter to commit and push"
 
 echo
 echo "Commiting and pushing pom.xml ..."
-git add pom.xml
-git commit -m "update dependencies" && git push origin $BRANCH
-echo "... done"
+git add pom.xml && \
+git commit -m "update dependencies to latest releases" && \
+git push origin $BRANCH && \
+echo "... done" || echo "... FAILED"
