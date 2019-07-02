@@ -43,7 +43,7 @@ cleanBranches() {
     && git -C $1 checkout $2 > /dev/null 2>&1 \
     && git -C $1 pull        > /dev/null 2>&1 \
     && git -C $1 fetch origin --prune \
-    && git -C $1 branch --verbose |  awk '{print $1,$3}' | grep "\[gone\]" \
+    && git -C $1 branch -vv | egrep '\[origin/.*: gone\]' \
        | awk '{print $1}' | egrep -v "(^\*|dev*|master*)" \
        | xargs --no-run-if-empty git -C $1 branch --delete --force
   return $?
