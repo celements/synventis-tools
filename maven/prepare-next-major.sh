@@ -1,12 +1,12 @@
 #!/bin/bash
 die() { echo >&2 "failed - $@"; exit 1; }
 
-echo $1 | grep -E -q '^[0-9]+$' \
+echo "$1" | grep -E -q '^[0-9]+$' \
             || die "1. argument invalid: major version number" 
 VERSION=$1
-[ -n $2 ] || die "2. argument invalid: branch name" 
+[ -n "$2" ] || die "2. argument invalid: branch name" 
 BRANCH=$2
-[ -n $3 ] || die "3. argument invalid: commit message"
+[ -n "$3" ] || die "3. argument invalid: commit message"
 MESSAGE=$3
 
 if [ -n "$4" ]; then

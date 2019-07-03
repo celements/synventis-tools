@@ -1,7 +1,7 @@
 #!/bin/bash
 die() { echo >&2 "failed - $@"; exit 1; }
 
-[ -n $1 ] || die "1. argument invalid: branch name" 
+[ -n "$1" ] || die "1. argument invalid: branch name" 
 BRANCH=$1
 
 if [ -n "$2" ]; then
@@ -15,7 +15,7 @@ git checkout dev && git pull
 echo
 echo "Preparing release branch '${BRANCH}' ..."
 git branch ${BRANCH}
-git checkout ${BRANCH}
+git checkout ${BRANCH} && git merge dev && \
 echo "... done" || die "unable to prepare branch ${BRANCH}"
 
 echo
