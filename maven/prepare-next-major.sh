@@ -35,8 +35,8 @@ echo
 echo "Updating pom.xml ..."
 mvn versions:set \
     -DnewVersion=${VERSION}.0-SNAPSHOT -DgenerateBackupPoms=false && \
-mvn versions:use-latest-versions \
-    -Dincludes=com.celements:*,ch.programmonline:*,ch.newjobplacement:* \
+mvn versions:use-latest-versions -U \
+    -Dincludes=com.celements:*,com.synventis:*,ch.programmonline:*,ch.newjobplacement:* \
     -DallowSnapshots=true -DprocessParent=true -DgenerateBackupPoms=false && \
 echo "... done" || die "maven versions command failed"
 
@@ -51,7 +51,7 @@ echo
 read -p "Update external dependencies (except xwiki)? [y/N] " -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-  mvn versions:use-latest-versions \
+  mvn versions:use-latest-versions -U \
       -Dexcludes=org.xwiki.platform:* -DgenerateBackupPoms=false && \
   echo "... done" || echo "... FAILED"
 fi
