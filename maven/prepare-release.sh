@@ -23,14 +23,14 @@ echo "Updating pom.xml change SNAPSHOT to releases, if available ..."
 # doesn't work for milestones with naming schema 'x.y-M1'
 mvn versions:use-releases \
     -Dincludes=com.celements:*,ch.programmonline:*,ch.newjobplacement:* \
-    -DprocessParent=true -DfailIfNotReplaced=true -DgenerateBackupPoms=false && \
+    -DprocessParent=true -DfailIfNotReplaced=true -DgenerateBackupPoms=false -U && \
 echo "... done" || die "maven versions command failed"
 
 echo
 echo "Updating pom.xml using latest releases ..."
 mvn versions:use-latest-releases \
     -Dincludes=com.celements:*,ch.programmonline:*,ch.newjobplacement:* \
-    -DprocessParent=true -DgenerateBackupPoms=false && \
+    -DprocessParent=true -DgenerateBackupPoms=false -U && \
 echo "... done" || die "maven versions command failed"
 
 while :
