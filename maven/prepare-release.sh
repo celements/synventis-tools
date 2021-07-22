@@ -15,7 +15,10 @@ git checkout dev && git pull
 echo
 echo "Preparing release branch '${BRANCH}' ..."
 git branch ${BRANCH}
-git checkout ${BRANCH} && git merge dev && \
+git checkout ${BRANCH} && \
+(! git branch -r --contains ${BRANCH} &> /dev/null || \
+   git pull origin ${BRANCH}) && \
+git merge dev && \
 echo "... done" || die "unable to prepare branch ${BRANCH}"
 
 echo
@@ -50,6 +53,6 @@ read -p "Please check pom.xml, press enter to commit and push"
 echo
 echo "Commiting and pushing pom.xml ..."
 git add pom.xml && \
-git commit -m "update dependencies to latest releases" && \
-git push origin $BRANCH && \
+git commit -m "[prepare-release] update dependencies to latest releases" && \
+git push origin ${BRANCH} && \
 echo "... done" || echo "... FAILED"
