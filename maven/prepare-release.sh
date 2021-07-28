@@ -16,7 +16,7 @@ echo
 echo "Preparing release branch '${BRANCH}' ..."
 git branch ${BRANCH}
 git checkout ${BRANCH} && \
-(! git branch -r --contains ${BRANCH} &> /dev/null || \
+(! git branch -r | grep "${BRANCH}" &> /dev/null || \
    git pull origin ${BRANCH}) && \
 git merge dev && \
 echo "... done" || die "unable to prepare branch ${BRANCH}"
