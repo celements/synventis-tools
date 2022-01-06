@@ -48,11 +48,13 @@ done
 echo "... success"
 
 echo
+git diff pom.xml
+echo
 read -p "Please check pom.xml, press enter to commit and push"
 
 echo
 echo "Commiting and pushing pom.xml ..."
 git add pom.xml && \
 git commit -m "[prepare-release] update dependencies to latest releases" && \
-git push origin ${BRANCH} && \
+git push --set-upstream origin ${BRANCH} && \
 echo "... done" || echo "... FAILED"
