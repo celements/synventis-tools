@@ -11,6 +11,9 @@ main() {
     echo "Invalid directory: '$mainDir'"
     exit 1
   else
+    githubKeyfile="$(ssh -G github | grep '^identityfile' | head -1 | awk '{print $2}')"
+    [ -f ${githubKeyfile/#\~/$HOME} ] \
+      && ssh-add ${githubKeyfile/#\~/$HOME}
     declare -A pids
     runAsync $mainDir
     for subDir in $mainDir/*; do
