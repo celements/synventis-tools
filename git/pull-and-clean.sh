@@ -12,8 +12,10 @@ main() {
     exit 1
   else
     githubKeyfile="$(ssh -G github | grep '^identityfile' | head -1 | awk '{print $2}')"
-    [ -f "${githubKeyfile/#\~/$HOME}" ] \
-      && ssh-add "${githubKeyfile/#\~/$HOME}"
+    githubKeyfile=${githubKeyfile/#\~/$HOME}
+    [ -f "$githubKeyfile" ] \
+      && ! ssh-add -l | grep -q "$(ssh-keygen -lf "$githubKeyfile" | awk '{print $2}')" \
+      && ssh-add "$githubKeyfile"
     declare -A pids
     runAsync "$mainDir"
     for subDir in "$mainDir"/*; do
