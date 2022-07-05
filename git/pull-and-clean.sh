@@ -11,13 +11,18 @@ main() {
     echo "Invalid directory: '$mainDir'"
     exit 1
   else
+    githubKeyfile="$(ssh -G github | grep '^identityfile' | head -1 | awk '{print $2}')"
+    githubKeyfile=${githubKeyfile/#\~/$HOME}
+    [ -f "$githubKeyfile" ] \
+      && ! ssh-add -l | grep -q "$(ssh-keygen -lf "$githubKeyfile" | awk '{print $2}')" \
+      && ssh-add "$githubKeyfile"
     declare -A pids
-    runAsync $mainDir
-    for subDir in $mainDir/*; do
-      runAsync $subDir
+    runAsync "$mainDir"
+    for subDir in "$mainDir"/*; do
+      runAsync "$subDir"
     done
     for name in "${!pids[@]}"; do
-      wait ${pids[$name]} \
+      wait "${pids[$name]}" \
         && echo "done    [$name]" \
         || echo "FAILED  [$name]"
     done
@@ -28,8 +33,8 @@ main() {
 ## runs the script async for a given git repository '$1'
 runAsync() {
   if [ "$1" ] && [ -d "$1/.git" ]; then
-    cleanBranches $1 dev &
-    pids[$(basename $1)]=$!
+    cleanBranches "$1" dev &
+    pids[$(basename "$1")]=$!
   fi
 }
 
@@ -40,14 +45,14 @@ runAsync() {
 ## 4. deleting local branches gone from remote
 cleanBranches() {
   [ "$1" ] && [ -d "$1/.git" ] && [ "$2" ] \
-    && git -C $1 checkout $2 > /dev/null 2>&1 \
-    && git -C $1 pull        > /dev/null 2>&1 \
-    && git -C $1 fetch origin --prune \
-    && git -C $1 branch -vv | egrep '\[origin/.*: gone\]' \
-       | awk '{print $1}' | egrep -v "(^\*|dev|master)" \
-       | xargs --no-run-if-empty git -C $1 branch --delete --force
+    && git -C "$1" checkout "$2" > /dev/null 2>&1 \
+    && git -C "$1" pull          > /dev/null 2>&1 \
+    && git -C "$1" fetch origin --prune \
+    && git -C "$1" branch -vv | grep -E '\[origin/.*: gone\]' \
+       | awk '{print $1}' | grep -Ev "(^\*|dev|master)" \
+       | xargs --no-run-if-empty git -C "$1" branch --delete --force
   return $?
 }
 
 ## main call
-main $@
+main "$@"
