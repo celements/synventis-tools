@@ -4,10 +4,8 @@ set -euo pipefail
 version="${1:-$version}"
 fesHostArr=("fes1" "fes2")
 allDeployHosts="cel1 cel2 cel3"
-IFS=' '
-read -a allDeployHostArr <<< "${allDeployHosts}"
 
-for deployHost in "${allDeployHostArr[@]}";
+for deployHost in $allDeployHosts;
 do
     printf "deploy $version on Host $deployHost\n"
     for fesHost in "${fesHostArr[@]}";
