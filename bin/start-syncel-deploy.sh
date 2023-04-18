@@ -15,7 +15,7 @@ do
         printf -- '-----------------------------\n'
         ssh -t $fesHost "sudo /opt/server-tools/bin/tomcat/fes-set-workers.sh ${allDeployHosts/$deployHost/}"
     done
-    /opt/server-tools/bin/tomcat/deploy-syncel.sh $deployHost $version
+    /opt/server-tools/bin/tomcat/deploy-syncel.sh "$deployHost" "$version"
 done
 
 for fesHost in "${fesHostArr[@]}";
