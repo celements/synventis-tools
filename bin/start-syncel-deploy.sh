@@ -1,7 +1,8 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 version="${1:-$version}"
+[ -z "$version" ] && echo "version missing" && exit 1
 fesHostArr=("fes1" "fes2")
 allDeployHosts="cel1 cel2 cel3"
 

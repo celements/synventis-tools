@@ -9,13 +9,13 @@ if [ -n "$2" ]; then
 fi
 [ -f ./pom.xml ] || die "execute in maven project folder"
 
-git checkout dev && git pull
+git switch dev && git pull
 [ $? ] || die "unable to pull from git repository, check connection"
 
 echo
 echo "Preparing release branch '${BRANCH}' ..."
 git branch ${BRANCH}
-git checkout ${BRANCH} && \
+git switch ${BRANCH} && \
 (! git branch --remotes | egrep --quiet "(^|\s)origin/${BRANCH}(\s|$)" || \
    git pull origin ${BRANCH}) && \
 git merge dev && \

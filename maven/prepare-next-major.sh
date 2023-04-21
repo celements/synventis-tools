@@ -14,7 +14,7 @@ if [ -n "$4" ]; then
 fi
 [ -f ./pom.xml ] || die "execute in maven project folder"
 
-git checkout dev && \
+git switch dev && \
 git pull
 [ $? ] || die "unable to pull from git repository, check connection"
 
@@ -28,7 +28,7 @@ echo "... done"
 echo
 echo "Preparing new branch '${BRANCH}' ..."
 git branch ${BRANCH}
-git checkout ${BRANCH} && \
+git switch ${BRANCH} && \
 echo "... done" || die "unable to prepare branch ${BRANCH}"
 
 echo
