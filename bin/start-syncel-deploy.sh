@@ -8,12 +8,12 @@ allDeployHosts="cel1 cel2 cel3"
 
 for deployHost in $allDeployHosts;
 do
-    printf "deploy $version on Host $deployHost\n"
+    echo "deploy $version on Host $deployHost"
     for fesHost in "${fesHostArr[@]}";
     do
-        printf -- '-----------------------------\n'
-        printf "remove $deployHost from $fesHost loadbalancing\n"
-        printf -- '-----------------------------\n'
+        echo '-----------------------------'
+        echo "remove $deployHost from $fesHost loadbalancing"
+        echo '-----------------------------'
         ssh -t $fesHost "sudo /opt/server-tools/bin/tomcat/fes-set-workers.sh ${allDeployHosts/$deployHost/}"
     done
     /opt/server-tools/bin/tomcat/deploy-syncel.sh "$deployHost" "$version"
@@ -21,8 +21,8 @@ done
 
 for fesHost in "${fesHostArr[@]}";
 do
-    printf -- "--------------------------------------------\n"
-    printf "readd all nodes to $fesHost loadbalancing\n"
-    printf -- "--------------------------------------------\n"
+    echo "--------------------------------------------"
+    echo "readd all nodes to $fesHost loadbalancing"
+    echo "--------------------------------------------"
     ssh -t $fesHost "sudo /opt/server-tools/bin/tomcat/fes-set-workers.sh ${allDeployHosts}"
 done
