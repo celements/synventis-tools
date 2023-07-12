@@ -33,7 +33,7 @@ main() {
 ## runs the script async for a given git repository '$1'
 runAsync() {
   if [ "$1" ] && [ -d "$1/.git" ]; then
-    cleanBranches "$1" dev &
+    (cleanBranches "$1" dev || cleanBranches "$1" develop)  &
     pids[$(basename "$1")]=$!
   fi
 }
