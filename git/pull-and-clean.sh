@@ -19,14 +19,12 @@ main() {
       && ! ssh-add -l | grep -q "$(ssh-keygen -lf "$githubKeyfile" | awk '{print $2}')" \
       && ssh-add "$githubKeyfile"
     declare -A pids
-    runAsync "$mainDir"
-    for subDir in "$mainDir"/*; do
-      runAsync "$subDir"
+    directories=("$mainDir" "$mainDir"/*)
+    for dir in "${directories[@]}"; do
+      runAsync "$dir"
     done
-    for name in "${!pids[@]}"; do
-      wait "${pids[$name]}" \
-        && echo "done    [$name]" \
-        || echo "FAILED  [$name]"
+    for dir in "${directories[@]}"; do
+      joinAsync "$dir"
     done
     exit 0
   fi
@@ -38,6 +36,16 @@ runAsync() {
     cleanBranches "$1" &
     pids[$(basename "$1")]=$!
   fi
+}
+
+## joins the async process for a given git repository '$1'
+joinAsync() {
+  name=$(basename "$1")
+  pid=${pids[$name]}
+  [ -z "$pid" ] && return
+  wait "$pid" \
+    && echo "done    [$name]" \
+    || echo "FAILED  [$name]"
 }
 
 ## does the following process for for a git repository '$1':
