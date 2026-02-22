@@ -4,6 +4,7 @@ set -euo pipefail
 # Calculate script directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FORMATTER_CONFIG="$DIR/../eclipse/synventis-code-formatter.xml"
+echo "Formater-config: $FORMATTER_CONFIG"
 
 # Help message
 function show_help {
@@ -33,8 +34,13 @@ if [ ! -f "$FORMATTER_CONFIG" ]; then
     exit 1
 fi
 
+echo "`pwd`"
+
 mvn net.revelc.code.formatter:formatter-maven-plugin:2.23.0:format \
-    -Dformatter.configFile="$FORMATTER_CONFIG" \
-    -Dencoding=UTF-8 \
+    -Dconfigfile="$FORMATTER_CONFIG" \
+    -Dlineending=LF \
+    -Dmaven.compiler.source=21 \
+    -Dmaven.compiler.target=21 \
+    -Dformatter.overrideConfigCompilerVersion=true \
     -Dproject.build.sourceEncoding=UTF-8 \
     "$@"
