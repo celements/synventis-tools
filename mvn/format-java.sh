@@ -4,7 +4,7 @@ set -euo pipefail
 # Calculate script directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FORMATTER_CONFIG="$DIR/../eclipse/synventis-code-formatter.xml"
-echo "Formater-config: $FORMATTER_CONFIG"
+echo "Formatter config: $FORMATTER_CONFIG"
 
 # Help message
 function show_help {
