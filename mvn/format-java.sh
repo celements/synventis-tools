@@ -42,7 +42,7 @@ JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | sed -E 's/^1\.//' | cut -d'.' -f1)
 
 mvn net.revelc.code.formatter:formatter-maven-plugin:2.23.0:format \
     -Dconfigfile="$FORMATTER_CONFIG" \
-    -Dlineending=LF \
+    -Dlineending=KEEP \
     -Dmaven.compiler.source="$JAVA_MAJOR_VERSION" \
     -Dmaven.compiler.target="$JAVA_MAJOR_VERSION" \
     -Dformatter.overrideConfigCompilerVersion=true \
