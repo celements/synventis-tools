@@ -1,0 +1,4 @@
+interface:
+  display_name: "Celements Testing"
+  short_description: "Patterns and guidance for Celements unit tests"
+  default_prompt: "Use $celements-testing to write or refactor Celements unit tests in this codebase."

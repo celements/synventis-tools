@@ -1,0 +1,4 @@
+interface:
+  display_name: "Celements Component"
+  short_description: "Celements XWiki/Spring component bridge guidance."
+  default_prompt: "Use this skill when refactoring Celements legacy XWiki components to Spring beans or reviewing component lookup, hint, and bean wiring behavior."
