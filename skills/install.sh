@@ -7,7 +7,7 @@ function install_skills {
   local agent="$1"
   local target="$2"
   mkdir -p "$target"
-  for skill_dir in "$script_dir/$agent"/*; do
+  for skill_dir in "$script_dir"/*; do
     [ -d "$skill_dir" ] || continue
     [ -f "$skill_dir/SKILL.md" ] || continue
     skill_name="$(basename "$skill_dir")"
