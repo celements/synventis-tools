@@ -1,40 +1,35 @@
 ---
 name: celements-testing
-description: Use when writing or refactoring tests in Celements, XWiki, or Progon Java codebases, especially JUnit and EasyMock tests built on AbstractComponentTest for components, Spring beans, controllers, listeners, and services. Covers registerComponentMocks, getMock, createDefaultMock, replayDefault and verifyDefault, bean lookup, and unwrapping Spring AOP proxies when the goal is to test method logic rather than annotations.
+description: Use when writing or refactoring tests in Celements Java codebases, including Celements-based Progon code, especially JUnit and EasyMock tests built on com.celements.common.test.AbstractComponentTest for components, Spring beans, controllers, listeners, and services. Covers registerComponentMocks, getMock, createDefaultMock, replayDefault and verifyDefault, bean lookup, and unwrapping Spring AOP proxies when the goal is to test method logic rather than annotations.
 ---
 
 # Celements Testing
 
 ## Overview
 
-Prefer Celements component-style tests when the code under test depends on the Celements or XWiki component container, Spring wiring, or existing component mocks. Keep the test focused on method behavior: search params, rights checks, conversion, exception mapping, and returned DTOs.
+Prefer Celements component-style tests when the code under test depends on the Celements component container, XWiki-derived APIs, Spring wiring, or existing component mocks. Progon is Celements-based, so the same test guidance applies there. Keep the test focused on method behavior: search params, rights checks, conversion, exception mapping, and returned DTOs.
 
 ## When To Use
 
 Use this skill when:
 
-- the test should extend `AbstractComponentTest`
+- the test should extend `com.celements.common.test.AbstractComponentTest`
 - collaborators should be registered with `registerComponentMocks(...)` or `registerComponentMock(...)`
 - the class under test is loaded from the Celements or Spring container
 - the code uses EasyMock and should rely on `replayDefault()` and `verifyDefault()`
 - the goal is direct method testing, not HTTP annotation or MVC-layer testing
 
-Do not default to `MockMvc` or annotation tests unless the user explicitly asks to test the web layer.
+Do not default to Spring's `MockMvc` or annotation tests unless the user explicitly asks to test the web layer.
 
 ## Dependencies And Libraries
 
-In the Celements and Progon codebases inspected here, the standard stack for these tests is:
+The standard stack for these tests is:
 
-- `junit:junit` for JUnit 4 style `@Before` and `@Test`
-- `org.easymock:easymock` for `expect(...)`, `createDefaultMock(...)`, `replayDefault()`, and `verifyDefault()`
+- `junit:junit` for JUnit style `@Before` and `@Test`
+- `org.easymock:easymock` for EasyMock expectations and mocks
 - `com.celements:celements-shared-tests` for `AbstractComponentTest`
 
-Historical note:
-
-- older discussions and repo paths may still say `celements-common-test`
-- in the current Celements workspace, the artifact providing this support is `com.celements:celements-shared-tests`
-
-In many Celements and Progon modules these arrive from the shared parent pom already. If `AbstractComponentTest`, EasyMock helpers, or the test harness classes are missing, first inspect the parent pom before adding duplicate module-level dependencies.
+In many Celements modules and Celements-based Progon modules these arrive from the shared parent pom already. If `AbstractComponentTest`, EasyMock helpers, or the test harness classes are missing, first inspect the parent pom before adding duplicate module-level dependencies.
 
 If the module does need explicit test dependencies, the minimal set is usually:
 
@@ -59,7 +54,8 @@ If the module does need explicit test dependencies, the minimal set is usually:
 
 Use the version managed by the parent pom when available instead of duplicating it in the module.
 
-Additional test-scope dependencies are often module-specific. In the local Progon modules inspected here, examples included `celements-wiki-manager`, `celements-spring-security`, `celements-mailsender`, and `celements-layout`.
+Additional test-scope dependencies are module-specific. Inspect the parent pom and neighboring
+tests before adding or duplicating them.
 
 ## Default Workflow
 
@@ -81,11 +77,14 @@ Additional test-scope dependencies are often module-specific. In the local Progo
 
 ### Loading the unit under test
 
-- In tests extending `AbstractComponentTest`, prefer the parent-class helpers directly: `getBeanFactory()`, `registerComponentMocks(...)`, `getMock(...)`, `createDefaultMock(...)`, `replayDefault()`, and `verifyDefault()`.
+- In tests extending `AbstractComponentTest`, use the parent-class helpers directly:
+  `getBeanFactory()`, `registerComponentMocks(...)`, `getMock(...)`, `createDefaultMock(...)`,
+  `replayDefault()`, and `verifyDefault()`.
 - For controllers, listeners, beans, roles, and hinted components in `AbstractComponentTest`-based tests, use `getBeanFactory().getBean(...)`.
 - For hinted lookups such as class definitions, use the bean-factory form, e.g. `getBeanFactory().getBean(MyClass.CLASS_DEF_HINT, ClassDefinition.class)`.
-- If Spring bean lookup is not initialized yet in the test harness, prime it with `getBeanFactory().getBean(SpringContextProvider.class)` before loading the real bean.
-- Do not use `Utils.getComponent(...)` in tests that extend `AbstractComponentTest`; treat it as legacy container access that should be replaced by `getBeanFactory().getBean(...)` in this test style.
+- Avoid static lookups in tests that extend `AbstractComponentTest`: neither
+  `SpringContextProvider.getBeanFactory().getBean(...)` nor legacy
+  `com.xpn.xwiki.web.Utils.getComponent(...)`.
 - If the bean is returned as a Spring AOP proxy and the user wants unit tests for the method body, unwrap the proxy target before invoking methods.
 
 Example:
@@ -150,8 +149,9 @@ verifyDefault();
 - Keep assertions on observable outcomes: returned DTOs, response status, thrown exceptions, or interactions that define behavior.
 - For controller tests, cover both the happy path and the main denial or not-found branches.
 - If the code under test depends on named components such as configuration sources, register the hinted component explicitly.
-- In `AbstractComponentTest`-based tests, reach for parent helpers such as `getBeanFactory()` before any direct container utility.
-- Reuse real infrastructure only where the test harness expects it. In `AbstractComponentTest`, core infrastructure like `Execution` may be safer left as the registered component than replaced with a standalone mock.
+- In `AbstractComponentTest`-based tests, use parent helpers such as `getBeanFactory()` before any
+  direct container utility.
+- Reuse real infrastructure only where the test harness expects it. In `AbstractComponentTest`, core infrastructure like `org.xwiki.context.Execution` may be safer left as the registered component than replaced with a standalone mock.
 - When the project already has similar Celements tests, follow the local house style before introducing a new pattern.
 
 ## Common Pitfalls
@@ -167,7 +167,7 @@ verifyDefault();
 - `AbstractComponentTest`
 - `registerComponentMocks(...)` first
 - prefer parent helpers from `AbstractComponentTest`
-- use `getBeanFactory().getBean(...)` for all component lookups
+- use the parent `getBeanFactory().getBean(...)` helper for all component lookups
 - unwrap `Advised` beans when avoiding annotation testing
 - `getMock(...)` for registered collaborators
 - `createDefaultMock(...)` for fixture/shared collaborators

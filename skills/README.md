@@ -8,7 +8,7 @@ integration, and install scope.
 
 ## Available skills
 
-- `celements-component`: guidance for Celements/XWiki component and Spring bean wiring.
+- `celements-component`: guidance for XWiki components and Spring bean wiring.
 - `celements-testing`: guidance for Celements tests based on `AbstractComponentTest`.
 
 ## Install

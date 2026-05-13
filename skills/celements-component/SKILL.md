@@ -1,6 +1,6 @@
 ---
 name: celements-component
-description: Use when working in Celements, XWiki, or Progon code that touches the mixed XWiki component and Spring bean system, especially when refactoring legacy org.xwiki.component.annotation.Component classes to Spring @Component/@Service beans, reviewing ComponentManager/Utils.getComponent/BeanFactory lookups, handling @ComponentRole/@Requirement/@Inject, component hints, META-INF/components.txt, or diagnosing bean wiring and lookup pitfalls.
+description: Use when working in Celements code, including Celements-based Progon code, that touches the mixed XWiki component and Spring bean system, especially when refactoring legacy org.xwiki.component.annotation.Component classes to Spring @Component/@Service beans, reviewing ComponentManager/Utils.getComponent/BeanFactory lookups, handling @ComponentRole/@Requirement/@Inject, component hints, META-INF/components.txt, or diagnosing bean wiring and lookup pitfalls.
 ---
 
 # Celements Component
@@ -11,15 +11,16 @@ Celements runs a hybrid component system: legacy XWiki components are loaded int
 
 ## First Checks
 
-Inspect these files when behavior is unclear:
+Inspect these classes when behavior is unclear in the `celements-base/celements-component` module:
 
-- `celements-component/src/main/java/com/celements/spring/context/CelSpringContext.java`
-- `celements-component/src/main/java/com/celements/spring/context/SpringShimComponentManager.java`
-- `celements-component/src/main/java/com/celements/spring/context/XWikiShimBeanFactory.java`
-- `celements-component/src/main/java/com/celements/spring/context/XWikiShimBeanPostProcessor.java`
-- `celements-component/src/main/java/org/xwiki/component/annotation/ComponentAnnotationLoader.java`
-- `celements-component/src/main/java/org/xwiki/component/annotation/ComponentDescriptorFactory.java`
-- `celements-component/src/main/java/org/xwiki/component/descriptor/ComponentDescriptor.java`
+- `com.celements.spring.context.CelSpringContext`
+- `com.celements.spring.context.SpringShimComponentManager`
+- `com.celements.spring.context.XWikiShimBeanFactory`
+- `com.celements.spring.context.XWikiShimBeanPostProcessor`
+- `com.celements.spring.context.SpringContextProvider`
+- `org.xwiki.component.annotation.ComponentAnnotationLoader`
+- `org.xwiki.component.annotation.ComponentDescriptorFactory`
+- `org.xwiki.component.descriptor.ComponentDescriptor`
 
 Prefer live code over memory when reviewing a branch, because this bridge is central infrastructure and details may change.
 
@@ -34,13 +35,18 @@ roleClassName + "|||" + roleHint
 ```
 
 Spring-native beans have normal Spring bean names unless explicitly named. With
-`FullyQualifiedAnnotationBeanNameGenerator`, scanned Spring components normally get their fully
-qualified implementation class name as bean name. That is a different namespace from XWiki's
-role-and-hint model.
+`org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator`, scanned Spring
+components normally get their fully qualified implementation class name as bean name. That is a
+different namespace from XWiki's role-and-hint model.
 
 `SpringShimComponentManager` implements XWiki `ComponentManager` by delegating lookups to the Spring `BeanFactory`. This means legacy calls such as `Utils.getComponent(MyRole.class)` or `componentManager.lookup(MyRole.class)` may still resolve plain Spring beans by type.
 
 `XWikiShimBeanPostProcessor` keeps old `@Requirement` injection and `Initializable.initialize()` support working for Spring-managed beans. A bean can therefore be Spring-managed and still receive legacy XWiki requirements.
+
+For code that cannot use injection and needs static access, use `SpringContextProvider` for direct
+Spring context access and legacy `Utils.getComponent(...)` for XWiki component lookup.
+`SpringContextProvider` exposes `getSpringContext()`, `getBeanFactory()`, and
+`getEventPublisher()`.
 
 ## Hints And Bean Names
 
@@ -161,7 +167,9 @@ Keep `@ComponentRole` when role/hint lookup is part of the contract. Removing it
 - Check whether lookups are plain type lookups or hinted/named lookups.
 - Verify whether the implementation is discovered by Spring scanning after removing a `components.txt` entry.
 - Verify `List<Role>` or `lookupList(Role.class)` injection if the component is an extension/listener/converter.
-- Check test harness assumptions; `AbstractComponentTest` normally prefers `getBeanFactory().getBean(...)`.
+- Check test harness assumptions. In tests extending `AbstractComponentTest`, use the parent
+  class' `getBeanFactory().getBean(...)` helper instead of static lookup through
+  `SpringContextProvider` or `Utils.getComponent(...)`.
 - Avoid changing runtime behavior by converting too many related components in one PR.
 
 ## Common Pitfalls
@@ -172,7 +180,8 @@ Keep `@ComponentRole` when role/hint lookup is part of the contract. Removing it
 - Forgetting that XWiki `@Requirement` is still injected by `XWikiShimBeanPostProcessor`.
 - Replacing `Initializable.initialize()` without preserving initialization timing.
 - Breaking listener/converter registration by changing component names or hints.
-- Using `Utils.getComponent(...)` in new tests instead of the Spring bean factory style preferred by `AbstractComponentTest`.
+- Using static lookup through `SpringContextProvider` or `Utils.getComponent(...)` in tests instead
+  of the parent `getBeanFactory()` helper provided by `AbstractComponentTest`.
 
 ## Practical Review Language
 
