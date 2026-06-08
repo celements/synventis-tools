@@ -1,0 +1,4 @@
+interface:
+  display_name: "Celements Testing"
+  short_description: "Patterns and guidance for Celements unit tests"
+  default_prompt: "Use this skill when writing or refactoring Celements tests based on AbstractComponentTest, including in Progon."
