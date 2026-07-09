@@ -1,0 +1,4 @@
+interface:
+  display_name: "Celements Vue"
+  short_description: "Vue islands with Reka and Tailwind in Celements"
+  default_prompt: "Use $celements-vue when adding or reviewing Vue islands with Reka UI and Tailwind in a Celements or Progon legacy page."

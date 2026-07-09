@@ -10,6 +10,8 @@ integration, and install scope.
 
 - `celements-component`: guidance for XWiki components and Spring bean wiring.
 - `celements-testing`: guidance for Celements tests based on `AbstractComponentTest`.
+- `celements-vue`: guidance for Vue islands in Celements legacy pages.
+- `celements-struct`: guidance for structured editor fields, object lists, and tables.
 
 ## Install
 
