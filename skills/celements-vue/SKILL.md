@@ -49,6 +49,8 @@ Keep the island root owned by Vue. Do not let legacy scripts mutate the same sub
 
 Use `reka-ui` for accessible headless primitives when a component needs behavior such as popovers, collapsibles, dialogs, tabs, menus, or selects.
 
+For component-specific API details and examples, consult Reka UI's LLM-friendly docs at https://reka-ui.com/llms.txt.
+
 Good defaults:
 
 - import only the primitives needed by the island
@@ -56,8 +58,6 @@ Good defaults:
 - check portal/overlay behavior on the actual Celements page
 - keep popover/dialog z-index explicit when legacy overlays exist
 - avoid global theme CSS from component libraries
-
-Prefer Reka over heavy visual libraries in normal legacy pages. PrimeVue, Vuetify, and similar libraries bring more global theme, reset, overlay, and bundle assumptions. Use them only for a genuinely isolated tool surface where those costs are acceptable.
 
 ## Tailwind v4 Setup
 
@@ -112,7 +112,7 @@ Keep these constraints in mind:
 - Treat overlays, focus trapping, scroll locking, and z-index as integration risks.
 - Do not rely on router ownership of the page unless the app was designed as a full Vue surface.
 - Prefer data passed at mount time over scraping legacy DOM after mount.
-- Keep bundle scope intentional; shared dependencies can be fine, but unrelated pages should not pay for experiments.
+- Keep bundle scope intentional; avoid loading island-only dependencies on unrelated pages.
 
 ## Review Checklist
 
