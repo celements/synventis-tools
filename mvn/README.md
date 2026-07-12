@@ -14,11 +14,28 @@ All scripts are intended to be run from this folder (they `cd` to the script dir
 
 ---
 
+## Maven settings
+
+Setup the maven settings files in `~/.m2` with the following commands:
+
+```bash
+install -m 600 <workspace>/synventis-tools/mvn/settings.xml ~/.m2/
+# will prompt for your tokens (see below)
+read -rsp 'forge token: ' token && sed -i "s|{forge-token}|$token|g" ~/.m2/settings.xml
+read -rsp 'legacy token: ' token && sed -i "s|{legacy-token}|$token|g" ~/.m2/settings.xml
+```
+
+- `forge-token`: create your personal access token with at least `package=Read` permission here:
+  https://forge.celhosting.ch/user/settings/applications.
+- `legacy-token`: the legacy maven repository password (like before)
+
+---
+
 ## `build-dependency-tree`
 
 Scans a workspace for `pom.xml` files, extracts internal project coordinates, and prints a build order (top-down) as a list of project directories.
 
-It only includes projects that inherit from `com.celements:base-pom` (directly or transitively).
+It only includes projects that inherit from `com.celements:celements-parent`.
 
 ### Usage
 

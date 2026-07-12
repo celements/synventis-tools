@@ -3,7 +3,7 @@
 Analyzes Maven project dependencies and outputs the dependency tree.
 Performs topological sort to determine which projects must be built first.
 
-Only includes projects that inherit from celements base-pom (directly or transitively).
+Only includes projects that inherit from celements-parent (directly or transitively).
 
 Usage: ./build-dependency-tree.py [workspace_dir] [--verbose]
 
@@ -17,8 +17,10 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
-# The root parent POM that all included projects must inherit from
-BASE_POM_KEY = 'com.celements:base-pom'
+# The root parent POM that all included projects must inherit from. The BOM is
+# included explicitly because it is imported by the parent but does not inherit it.
+ROOT_PARENT_KEY = 'com.celements:celements-parent'
+ROOT_PROJECT_KEYS = {ROOT_PARENT_KEY, 'com.celements:celements-bom'}
 
 def parse_pom(pom_path):
     """Parse a pom.xml and extract project coordinates, parent, and dependencies."""
@@ -47,12 +49,12 @@ def parse_pom(pom_path):
         parent_artifact = find_text('parent/artifactId', 'm:parent/m:artifactId')
         if parent_group and parent_artifact:
             parent_key = f"{parent_group}:{parent_artifact}"
-        # Get all dependencies (including parent as dependency for build order)
+        # Get all dependencies (including parent as dependency for build order).
+        # dependencyManagement is only a build dependency for imported BOMs.
         dependencies = []
         if parent_key:
             dependencies.append(parent_key)
-        for dep_path in ['dependencies/dependency', 'dependencyManagement/dependencies/dependency',
-                         'm:dependencies/m:dependency', 'm:dependencyManagement/m:dependencies/m:dependency']:
+        for dep_path in ['dependencies/dependency', 'm:dependencies/m:dependency']:
             for dep in root.findall(dep_path, ns) if 'm:' in dep_path else root.findall(dep_path):
                 dep_group = None
                 dep_artifact = None
@@ -64,25 +66,44 @@ def parse_pom(pom_path):
                         dep_artifact = child.text
                 if dep_group and dep_artifact:
                     dependencies.append(f"{dep_group}:{dep_artifact}")
+        for dep_path in ['dependencyManagement/dependencies/dependency',
+                         'm:dependencyManagement/m:dependencies/m:dependency']:
+            for dep in root.findall(dep_path, ns) if 'm:' in dep_path else root.findall(dep_path):
+                dep_group = None
+                dep_artifact = None
+                dep_type = None
+                dep_scope = None
+                for child in dep:
+                    tag = child.tag.replace('{http://maven.apache.org/POM/4.0.0}', '')
+                    if tag == 'groupId':
+                        dep_group = child.text
+                    elif tag == 'artifactId':
+                        dep_artifact = child.text
+                    elif tag == 'type':
+                        dep_type = child.text
+                    elif tag == 'scope':
+                        dep_scope = child.text
+                if dep_group and dep_artifact and dep_type == 'pom' and dep_scope == 'import':
+                    dependencies.append(f"{dep_group}:{dep_artifact}")
         return project_key, parent_key, list(set(dependencies))
     except Exception as e:
         print(f"Warning: Could not parse {pom_path}: {e}", file=sys.stderr)
         return None, None, []
 
-def has_base_pom_ancestor(project_key, parents, base_pom_key, cache=None):
-    """Check if project inherits from base-pom (directly or transitively)."""
+def has_root_parent_ancestor(project_key, parents, root_parent_key, cache=None):
+    """Check if project inherits from the root parent (directly or transitively)."""
     if cache is None:
         cache = {}
     if project_key in cache:
         return cache[project_key]
-    if project_key == base_pom_key:
+    if project_key == root_parent_key:
         cache[project_key] = True
         return True
     parent = parents.get(project_key)
     if not parent:
         cache[project_key] = False
         return False
-    result = has_base_pom_ancestor(parent, parents, base_pom_key, cache)
+    result = has_root_parent_ancestor(parent, parents, root_parent_key, cache)
     cache[project_key] = result
     return result
 
@@ -157,14 +178,14 @@ def main():
             dependencies[project_key] = deps
     print(f"Parsed {len(all_projects)} projects", file=sys.stderr)
     
-    # Filter to only projects inheriting from base-pom
+    # Filter to only projects inheriting from celements-parent, plus root artifacts.
     cache = {}
     projects = {
         k: v for k, v in all_projects.items()
-        if has_base_pom_ancestor(k, parents, BASE_POM_KEY, cache)
+        if k in ROOT_PROJECT_KEYS or has_root_parent_ancestor(k, parents, ROOT_PARENT_KEY, cache)
     }
     excluded = len(all_projects) - len(projects)
-    print(f"Filtered to {len(projects)} projects (excluded {excluded} without {BASE_POM_KEY} ancestor)", file=sys.stderr)
+    print(f"Filtered to {len(projects)} projects (excluded {excluded} without {ROOT_PARENT_KEY} ancestor)", file=sys.stderr)
     
     # Filter dependencies to only include filtered projects
     filtered_deps = {
