@@ -1,0 +1,320 @@
+<settings>
+  <profiles>
+    <profile>
+
+      <id>xwiki</id>
+
+      <properties>
+        <repo.url>https://forge.celhosting.ch/api/packages</repo.url>
+        <repo.url.celements>${repo.url}/celements/maven</repo.url.celements>
+        <repo.url.synventis>${repo.url}/synventis/maven</repo.url.synventis>
+        <repo.url.progon>${repo.url}/progonline/maven</repo.url.progon>
+        <repo.url.dist.celements>${repo.url.celements}</repo.url.dist.celements>
+        <repo.url.dist.synventis>${repo.url.synventis}</repo.url.dist.synventis>
+        <repo.url.dist.progon>${repo.url.progon}</repo.url.dist.progon>
+      </properties>
+
+      <repositories>
+        <repository>
+          <id>celements-forge</id>
+          <name>Celements Maven Repository</name>
+          <url>https://forge.celhosting.ch/api/packages/celements/maven</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>celements-releases</id>
+          <name>Legacy Celements Repository for Releases</name>
+          <url>https://celements.maven.celhosting.ch/releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>celements-snapshots</id>
+          <name>Legacy Celements Repository for Snapshots</name>
+          <url>https://celements.maven.celhosting.ch/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>celements-externals</id>
+          <name>Legacy Celements Repository for Externals</name>
+          <url>https://celements.maven.celhosting.ch/externals</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>xwiki-snapshots-nexus</id>
+          <name>XWiki Nexus Snapshot Repository Proxy</name>
+          <url>https://nexus.xwiki.org/nexus/content/groups/public-snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>xwiki-releases-nexus</id>
+          <name>XWiki Nexus Releases Repository Proxy</name>
+          <url>https://nexus.xwiki.org/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>xwiki-externals</id>
+          <name>XWiki Maven2 Remote Repository for Third Party Dependencies</name>
+          <url>https://maven.xwiki.org/externals</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>xwiki-releases</id>
+          <name>XWiki Maven2 Remote Repository for Releases</name>
+          <url>https://maven.xwiki.org/releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>xwiki-snapshots</id>
+          <name>XWiki Maven2 Remote Repository for Snapshots</name>
+          <url>https://maven.xwiki.org/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>synventis-forge</id>
+          <name>Synventis Maven Repository</name>
+          <url>https://forge.celhosting.ch/api/packages/synventis/maven</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>synventis-releases</id>
+          <name>Legacy Synventis Repository for Releases</name>
+          <url>https://synventis.maven.celhosting.ch/releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>synventis-snapshots</id>
+          <name>Legacy Synventis Repository for Snapshots</name>
+          <url>https://synventis.maven.celhosting.ch/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>progon-forge</id>
+          <name>ProgOnline Maven Repository</name>
+          <url>https://forge.celhosting.ch/api/packages/progonline/maven</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>progon-releases</id>
+          <name>Legacy ProgOnline Repository for Releases</name>
+          <url>https://progon.maven.celhosting.ch/releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>progon-snapshots</id>
+          <name>Legacy ProgOnline Repository for Snapshots</name>
+          <url>https://progon.maven.celhosting.ch/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>njpl-releases</id>
+          <name>Legacy NJPL Repository for Releases</name>
+          <url>https://njpl.maven.celhosting.ch/releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>njpl-snapshots</id>
+          <name>Legacy NJPL Repository for Snapshots</name>
+          <url>https://njpl.maven.celhosting.ch/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+
+      <pluginRepositories>
+        <pluginRepository>
+          <id>xwiki-plugins-externals</id>
+          <name>XWiki Maven2 Plugin Remote Repository for Third Party Plugins</name>
+          <url>https://maven.xwiki.org/externals</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>xwiki-plugins-releases</id>
+          <name>XWiki Maven2 Plugin Remote Repository for Releases</name>
+          <url>https://maven.xwiki.org/releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>xwiki-plugins-snapshots</id>
+          <name>XWiki Maven2 Plugin Remote Repository for Snapshots</name>
+          <url>https://maven.xwiki.org/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>xwiki-plugins-snapshots-nexus</id>
+          <name>XWiki Nexus Plugin Snapshot Repository Proxy</name>
+          <url>https://nexus.xwiki.org/nexus/content/groups/public-snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>xwiki-plugins-releases-nexus</id>
+          <name>XWiki Nexus Plugin Releases Repository Proxy</name>
+          <url>https://nexus.xwiki.org/nexus/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+
+    </profile>
+  </profiles>
+
+  <servers>
+    <server>
+      <id>celements-forge</id>
+      <username>synadm</username>
+      <password>{forge-token}</password>
+    </server>
+    <server>
+      <id>synventis-forge</id>
+      <username>synadm</username>
+      <password>{forge-token}</password>
+    </server>
+    <server>
+      <id>progon-forge</id>
+      <username>synadm</username>
+      <password>{forge-token}</password>
+    </server>
+    <server>
+      <id>synventis-releases</id>
+      <username>synventis</username>
+      <password>{legacy-token}</password>
+    </server>
+    <server>
+      <id>synventis-snapshots</id>
+      <username>synventis</username>
+      <password>{legacy-token}</password>
+    </server>
+    <server>
+      <id>progon-releases</id>
+      <username>synventis</username>
+      <password>{legacy-token}</password>
+    </server>
+    <server>
+      <id>progon-snapshots</id>
+      <username>synventis</username>
+      <password>{legacy-token}</password>
+    </server>
+    <server>
+      <id>njpl-releases</id>
+      <username>synventis</username>
+      <password>{legacy-token}</password>
+    </server>
+    <server>
+      <id>njpl-snapshots</id>
+      <username>synventis</username>
+      <password>{legacy-token}</password>
+    </server>
+  </servers>
+
+  <activeProfiles>
+    <activeProfile>xwiki</activeProfile>
+  </activeProfiles>
+
+</settings>
