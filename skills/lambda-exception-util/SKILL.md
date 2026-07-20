@@ -121,5 +121,8 @@ Avoid wrapping exceptions in `RuntimeException` just to bypass lambda limits whe
 
 ## Common Pitfalls
 
+- **Separating wrapper creation from execution:** The checked-exception contract exists only at the rethrow* call. Do not return or store the functional interface for later execution. E.g. with streams, keep the terminal operation inside the same try-block or method.
 - **Compiler type resolution failure:** Using generic `rethrow(...)` with an implicit parameter list that makes it hard for the Java compiler to infer the functional interface type. Prefer `rethrowFunction` or other explicit wrappers.
 - **Forgetting caller-level exception handling:** Assuming that since it's a lambda, you don't need to handle the exception. You still must declare or catch it at the enclosing method scope.
+
+
