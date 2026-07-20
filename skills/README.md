@@ -12,8 +12,8 @@ integration, and install scope.
 - `celements-testing`: guidance for Celements tests based on `AbstractComponentTest`.
 - `celements-vue`: guidance for Vue islands in Celements legacy pages.
 - `celements-struct`: guidance for structured editor fields, object lists, and tables.
+- `celements-velocity`: guidance for maintaining legacy Celements Velocity 1.7 templates.
 - `lambda-exception-util`: guidance for handling checked exceptions in lambdas.
-
 
 ## Install
 
