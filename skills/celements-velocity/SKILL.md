@@ -1,6 +1,6 @@
 ---
 name: celements-velocity
-description: Use when maintaining, reviewing, or adding Apache Velocity 1.7 templates in Celements or Celements-based Progon projects, especially file-based `.vm` templates, `#parse` integration from XAR pages, legacy `$xwiki` calls, Celements `$services` APIs, quiet references, AppScripts, and decisions about moving logic to Java or existing frontend components.
+description: Use when maintaining, reviewing, or adding Apache Velocity 1.7 templates in Celements or Celements-based Progon projects, especially choosing between Velocity server-side rendering, Spring MVC, and Vue.js; working with file-based `.vm` templates, `#parse`, Celements `$services` APIs, quiet references, output encoding, or authorization and CSRF checks for request-triggered mutations.
 ---
 
 # Celements Velocity
