@@ -5,11 +5,19 @@ description: Use when maintaining, reviewing, or adding Apache Velocity 1.7 temp
 
 # Celements Velocity
 
-## Before Using Velocity
+## Choose the Technology by Context
 
-Treat Velocity as legacy technology. Before adding or substantially extending a Velocity template, check for an existing Java service, ScriptService, frontend component, or other established project mechanism. Use Velocity only when the surrounding Celements infrastructure requires it or no practical alternative exists.
+Use Velocity for server-side rendering where it fits the surrounding Celements architecture. Velocity remains an established part of Celements and is not generally considered legacy or scheduled for replacement.
 
-Do not rewrite working legacy templates merely because they use Velocity. Apply these guidelines to new work and substantial rewrites.
+Treat many existing Velocity scripts as legacy because Velocity was historically overused in this codebase. Do not assume an existing template is a good example without checking its age, structure, and use of modern Celements APIs.
+
+Choose the technology according to the responsibility:
+
+- Use Velocity for server-rendered markup and template composition.
+- Prefer Java and Spring MVC for request handling, domain logic, and complex server-side behavior.
+- Prefer Vue.js or an existing frontend component for substantial client-side interaction.
+
+Do not rewrite working templates merely because they use Velocity. Apply these choices to new work and substantial rewrites.
 
 ## Use Velocity 1.7
 
@@ -44,11 +52,28 @@ Common modern Celements services include `$services.reference`, `$services.model
 
 Use quiet references such as `$!value` and `$!{value}` when a value may legitimately resolve to `null`. Velocity 1.7 otherwise renders the unresolved Velocity expression, which is not useful to customers.
 
-Use `$!{value}` when braces are needed to separate the reference from adjacent text. Quiet references suppress output; they do not provide a fallback value or change control flow. Use an explicit `#if` when absence changes behavior.
+Use `$!{value}` when braces are needed to separate the reference from adjacent text. Quiet references only suppress unresolved output. They do not provide a fallback value, change control flow, or escape the resolved value. Use an explicit `#if` when absence changes behavior.
+
+## Encode Output for Its Context
+
+Encode request data, document data, and other dynamic values for the context where they are rendered:
+
+- Use `$escapetool.html(...)` or `$escapetool.xml(...)` for HTML text and attributes, following the convention of the surrounding template.
+- Use `$escapetool.javascript(...)` for values embedded in JavaScript.
+- Use `$escapetool.url(...)` for dynamic URL values or components. Also HTML/XML-encode the resulting value when rendering it into an HTML attribute.
+- Use `$services.json.newBuilder()` for JSON instead of manually concatenating or escaping JSON strings.
+
+Do not treat a quiet reference as output encoding.
+
+## Guard Request-Triggered Mutations
+
+Before a request-triggered save, delete, or other mutation, verify that the current user has the required authorization through `$services.rightsAccess` and validate the CSRF token with `$services.csrf.isTokenValid(...)`.
+
+Do not rely on hiding an action in the UI. For complex mutations, delegate to a secured Java controller or service instead of implementing the mutation in an AppScript or `celAjax` template.
 
 ## Keep Templates Focused
 
-Use Velocity for small amounts of orchestration, service invocation, template composition, configuration, and markup. During substantial rewrites, move domain logic and complex processing into Java where practical. If Java extraction is not practical, divide the implementation among focused disk-based templates.
+Use Velocity for server-rendered markup, template composition, configuration, and small amounts of orchestration. During substantial rewrites, move domain logic and complex processing into Java where practical. If Java extraction is not practical, divide the implementation among focused disk-based templates.
 
 Prefer configuring an existing frontend or Celements component over reimplementing its behavior with Velocity loops and logic. Keep AppScript and setup templates small and delegate work to services or dedicated templates.
 
@@ -63,11 +88,13 @@ Treat these as patterns established by current Celements code, not instructions 
 
 ## Review Checklist
 
-- Confirm that Velocity is necessary and no established alternative fits better.
+- Confirm that Velocity fits the responsibility; consider Spring MVC for complex server-side behavior and Vue.js for substantial client-side interaction.
 - Confirm compatibility with Apache Velocity 1.7.
 - Keep substantial VTL in a version-controlled `.vm` file invoked with `#parse`.
 - Investigate every new or changed `$xwiki.xxx` call for a verified Celements ScriptService alternative.
 - Use quiet references for legitimately nullable rendered values.
+- Encode every dynamic output for its HTML/XML, JavaScript, URL, or JSON context; do not treat quiet references as escaping.
+- Require `$services.rightsAccess` authorization and `$services.csrf.isTokenValid(...)` before request-triggered mutations, or delegate complex mutations to secured Java code.
 - Keep orchestration small and move substantial logic to Java where practical.
 - Reuse existing disk templates and frontend or Celements components.
 - Use the Celements JSON builder when producing JSON in Velocity.
