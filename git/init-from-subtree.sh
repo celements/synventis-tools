@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ## init a new repository from a sub directory
 # $1 = sub directory
 # $2 = github org

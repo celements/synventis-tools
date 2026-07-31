@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ## Marc Sladek <marc@sadek.me>, June 2018
 ## sets the ssh url for all repositories
 
