@@ -1,6 +1,6 @@
 # synventis-tools
 
-Shared Synventis developer tooling for Git, Maven, Eclipse, deployment helpers, and agent skills.
+Shared Synventis developer tooling for Git, Maven, Eclipse, and agent skills.
 
 ## Eclipse Config
 
@@ -8,13 +8,13 @@ Shared Eclipse formatter, cleanup, and import-order settings live in [`eclipse/`
 
 ## Git Tools
 
-Git helper scripts live in [`git/`](git/), including repository cloning, subtree initialization,
-SSH URL conversion, and local cleanup helpers.
+Git helper scripts live in [`git/`](git/), including PR creation, subtree initialization, SSH URL
+conversion, and local cleanup helpers.
 
 ## Maven Tools
 
-Maven helper scripts live in [`mvn/`](mvn/). See [`mvn/README.md`](mvn/README.md) for release and
-formatting workflows.
+Maven helper scripts live in [`mvn/`](mvn/). See [`mvn/README.md`](mvn/README.md) for dependency
+inspection and formatting workflows.
 
 ## Agent Skills
 

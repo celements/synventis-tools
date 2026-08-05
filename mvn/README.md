@@ -1,13 +1,12 @@
 # Maven toolbox scripts
 
-This folder contains a small set of scripts to automate dependency updates across multiple Maven projects in a workspace.
+This folder contains helpers for inspecting Maven project dependencies and formatting Java code.
 
 ## Prerequisites
 
 - Debian/Linux with `bash`
 - `python3` (for `build-dependency-tree.py`)
-- `git`
-- `mvn` (and the Maven Versions Plugin available, since `versions:*` goals are used)
+- `mvn`
 - Workspace layout: a directory containing multiple Maven projects with `pom.xml` files
 
 All scripts are intended to be run from this folder (they `cd` to the script directory).
