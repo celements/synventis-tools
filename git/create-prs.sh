@@ -10,6 +10,7 @@ repos=$(gh repo list "$org" --source --no-archived --limit 1000 \
   --json nameWithOwner --jq '.[].nameWithOwner')
 
 for repo in $repos; do
+  # Best effort: skip repositories on branch lookup failure.
   gh api "repos/$repo/branches/$branch" --silent >/dev/null 2>&1 || continue
   pr=$(gh pr list --repo "$repo" --head "$branch" --state open \
     --json url --jq '.[0].url // empty')
