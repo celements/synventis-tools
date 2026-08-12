@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ## Marc Sladek <marc@sadek.me>, June-Nov 2018
 ## pulls and cleans the branches of the current or given and sub git repositories in parallel
 
