@@ -11,7 +11,9 @@ After changing relevant code, run available checks defined in `package.json` bef
 
 ## Localization
 
-If the app uses localization, place translation dictionaries under `@/conf/locale/`.
+If the app uses localization:
+- for new projects: place translation dictionaries under `@/conf/locale/`.
+- for exisiting projects: reuse existing translation dictionaries, usually under `@/conf/locale/` or `@/locale` 
 
 ## JavaScript and TypeScript
 
