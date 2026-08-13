@@ -1,9 +1,9 @@
 ---
-name: celements-vue
+name: celements-webapp-vue-islands
 description: Use when integrating Vue islands, Vite assets, or scoped Tailwind into legacy Celements pages.
 ---
 
-# Celements Vue
+# Celements Webapp Vue Islands
 
 Build page-level Vue islands, not a global SPA. Keep Vue and legacy scripts from owning the same DOM subtree.
 
