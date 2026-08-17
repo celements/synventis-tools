@@ -11,9 +11,11 @@ After changing relevant code, run available checks defined in `package.json` bef
 
 ## Localization
 
-If the app uses localization:
-- for new projects: place translation dictionaries under `@/conf/locale/`.
-- for exisiting projects: reuse existing translation dictionaries, usually under `@/conf/locale/` or `@/locale` 
+If app uses localization, use dictionaries in `@/conf/locale/` or legacy `@/locale`.
+
+## Vue
+
+- Order SFC blocks: `<template>`, `<script>`, `<style>`.
 
 ## JavaScript and TypeScript
 
@@ -24,4 +26,12 @@ If the app uses localization:
 
 ## Styling
 
-If the project uses Tailwind CSS, use it for all styling work. Avoid Vue `<style>` blocks or inline style attributes for CSS unless necessary.
+In Tailwind projects, use it on Vue-owned elements, including states and pseudo-elements. Arbitrary properties and variants
+are acceptable when concise and local.
+
+Use `<style>` for third-party or legacy DOM, or when complex selectors are clearer than Tailwind.
+
+Keep semantic class hooks only when consumed by JavaScript, CSS, or external code.
+
+When static utilities exceed the line limit, use a `:class` array with the fewest reasonably packed strings. Keep dynamic
+conditions separate.
