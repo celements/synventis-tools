@@ -1,5 +1,5 @@
 ---
-name: celements-vue
+name: celements-webapp-vue-islands
 description: Use when adding, reviewing, or debugging Vue islands in Celements or Celements-based Progon legacy pages, especially Vite frontend entrypoints, Velocity addExtJSfileOnce integration, Vue SFCs, reka-ui/headless components, Tailwind v4 with prefixed no-preflight utilities, Vite manifest JS/CSS resolution, and CSS cascade conflicts with legacy application.css.
 ---
 

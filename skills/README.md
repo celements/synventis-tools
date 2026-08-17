@@ -10,7 +10,7 @@ integration, and install scope.
 
 - `celements-component`: guidance for XWiki components and Spring bean wiring.
 - `celements-testing`: guidance for Celements tests based on `AbstractComponentTest`.
-- `celements-vue`: guidance for Vue islands in Celements legacy pages.
+- `celements-webapp-vue-islands`: guidance for Vue islands in Celements legacy pages.
 - `celements-struct`: guidance for structured editor fields, object lists, and tables.
 - `celements-velocity`: guidance for Celements Velocity 1.7 server-side rendering and integration.
 - `lambda-exception-util`: guidance for handling checked exceptions in lambdas.
