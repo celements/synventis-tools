@@ -3,7 +3,7 @@ name: celements-webapp-vue-islands
 description: Use when adding, reviewing or debugging Vue islands built and packaged within Celements or Progon webapp (WAR) modules and loaded through the Celements frontend resource resolver.
 ---
 
-# Celements Vue Islands
+# Celements Webapp Vue Islands
 
 Use page-level islands, not a global SPA, unless the page is an isolated Vue surface. Load each island only where it is needed.
 Prefer Vue + reka-ui + locally styled Tailwind utilities for new interactive islands. Avoid copying full app setups from standalone frontends unless the page is truly isolated.
