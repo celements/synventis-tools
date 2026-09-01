@@ -42,4 +42,3 @@ Use `reka-ui` for accessible headless behavior where appropriate. Import only re
 - Keep island dependencies off unrelated pages.
 - Test interactions and CSS cascade in the rendered Celements page; a green Vite build does not verify runtime asset loading.
 
-Run the relevant formatter, type check, and build scripts from `package.json`, then inspect the touched-file diff and whitespace.
