@@ -1,6 +1,6 @@
 ---
 name: celements-webapp-vue-islands
-description: Use for Vue islands embedded in legacy Celements or Progon pages.
+description: Use when adding, reviewing or debugging Vue islands built and packaged within Celements or Progon webapp (WAR) modules and loaded through the Celements frontend resource resolver.
 ---
 
 # Celements Vue Islands
