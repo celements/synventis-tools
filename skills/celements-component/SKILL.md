@@ -64,7 +64,7 @@ Converting `@org.xwiki.component.annotation.Component("myHint")` to `@Service` c
 
 ### Collection Lookup
 
-`lookupList(role)` and Spring `List<Role>` injection return beans assignable to the role. Descriptor-backed XWiki components participate because `CelSpringContext` registers them in Spring. Before removing descriptor registration, verify that another registration path remains and check list consumers such as extensions, listeners, and converters.
+`lookupList(role)` and Spring `List<Role>` injection return beans assignable to the role. `lookupMap(role)` returns the same beans keyed by the decoded XWiki hint for descriptor-backed components and by the Spring bean name otherwise. Before changing registration or bean naming, verify another registration path remains, check list consumers such as extensions, listeners, and converters, and check map consumers that select entries by key.
 
 ## Refactoring To Spring Beans
 
