@@ -16,7 +16,7 @@ Register the island in the existing `src/main/frontend/<app>/index.ts` entry map
 $!services.javascript.addExtJSfileOnce(':frontend/<app>/<island>/main.ts', 'file')
 ```
 
-Let the Celements frontend resolver use the Vite manifest. Never reference hashed `dist/*.mjs` or `assets/*.css` files from Velocity. Ensure `*.vue` typing is available, normally through `src/main/frontend/env.d.ts`.
+Let the Celements frontend resolver use the Vite manifest. Never reference hashed `dist/*.mjs` or `assets/*.css` files from Velocity.
 
 Pass server data through props derived from `data-*` attributes or JSON script elements. Vue must exclusively own its mount subtree; give legacy scripts separate roots. Do not scrape or mutate Vue-owned DOM after mounting.
 
