@@ -37,7 +37,7 @@ Use `reka-ui` for accessible headless behavior where appropriate. Import only re
 
 ## Runtime Constraints
 
-- Expect YUI, jQuery, Select2, and other legacy scripts on the same page.
+- Expect jQuery, Prototype.js, YUI, Select2, Bootstrap, and potentially other legacy CSS and JavaScript on the same page.
 - Do not add global resets or assume router ownership.
 - Keep island dependencies off unrelated pages.
 - Test interactions and CSS cascade in the rendered Celements page; a green Vite build does not verify runtime asset loading.
