@@ -1,6 +1,6 @@
 ---
 name: celements-testing
-description: Use for JUnit and EasyMock tests based on Celements AbstractComponentTest.
+description: Use for Celements or Progon JUnit and EasyMock tests involving the component container, XWiki APIs, Spring wiring, component mocks, or AbstractComponentTest.
 ---
 
 # Celements Testing

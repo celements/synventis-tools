@@ -33,3 +33,11 @@ Update installed skills with:
 ```bash
 skills update
 ```
+
+## Renamed skills
+Renamed skills are not migrated automatically. Run `skills add celements/synventis-tools` again to install newly added skills. Remove the old skill manually:
+
+```bash
+skills remove <old-name>
+skills add celements/synventis-tools
+```

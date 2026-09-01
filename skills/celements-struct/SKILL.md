@@ -1,6 +1,6 @@
 ---
 name: celements-struct
-description: Use for Celements structured data editor layouts.
+description: Use for Celements structured data editing involving StructuredDataEditor, StructuredDataView, StructEditFieldClass, struct object filters, SelectTagAutocomplete, struct ObjectList/Table layouts, structuredDataEditor or structData services, or structEditJS.
 ---
 
 # Celements Struct

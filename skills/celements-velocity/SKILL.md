@@ -21,6 +21,8 @@ Store substantial VTL in version-controlled `.vm` files and compose it with `#pa
 
 Prefer Celements ScriptServices exposed as `$services.<name>` over new `$xwiki.xxx` calls. Before using a service, inspect current `.vm` usages, its Java `ScriptService` implementation, and focused tests. Services commonly include `reference`, `modelAccess`, `url`, `rightsAccess`, `date`, `json`, and `celementsweb`; this is not a complete API list. Do not mechanically replace legacy calls or invent an unverified service contract.
 
+Resolve and serialize document references through `$services.reference` when the target service supports reference objects. Do not manually assemble or split document names without first checking the service API.
+
 ## Render Safely
 
 Use `$!value` or `$!{value}` for legitimately nullable output; use braces next to adjacent text and an explicit `#if` when absence changes behavior. Quiet references suppress unresolved expressions but neither supply defaults nor encode output.
