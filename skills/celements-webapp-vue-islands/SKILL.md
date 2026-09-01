@@ -10,13 +10,7 @@ Prefer Vue + reka-ui + locally styled Tailwind utilities for new interactive isl
 
 ## Integration
 
-Inspect the local setup before changing it:
-
-- `src/main/frontend/<app>/index.ts` for Vite entrypoints
-- `vite.config.ts` for plugins, `build.manifest`, `outDir`, and Rollup input
-- Velocity or appscript calls to `services.javascript.addExtJSfileOnce`
-
-Register the island entry, mount it through `src/main/frontend/shared/vue/mount.ts`, and include its stable source path from Velocity:
+Register the island in the existing `src/main/frontend/<app>/index.ts` entry map and mount it through `src/main/frontend/shared/vue/mount.ts`. Include its stable source entry from Velocity:
 
 ```velocity
 $!services.javascript.addExtJSfileOnce(':frontend/<app>/<island>/main.ts', 'file')
