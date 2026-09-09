@@ -223,6 +223,23 @@ class PaginationTest(unittest.TestCase):
                 lambda node: node,
             )
 
+    def test_allows_different_files_with_same_blob_sha(self):
+        first_page = [
+            {"filename": f"src/file-{index}.ts", "sha": f"sha-{index}"}
+            for index in range(100)
+        ]
+        second_page = [{"filename": "src/copy.ts", "sha": "sha-0"}]
+        client = FakeRestClient([first_page, second_page])
+        items, completeness = fetch_pr_context._paginate_rest_list(
+            client,
+            "repos/acme/widgets/pulls/42/files",
+            "files",
+            101,
+            lambda node: node,
+        )
+        self.assertEqual(101, len(items))
+        self.assertEqual(101, completeness["retrieved_items"])
+
     def test_paginates_wrapped_rest_list(self):
         first_page = {
             "total_count": 101,

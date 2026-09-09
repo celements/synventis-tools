@@ -610,7 +610,7 @@ def _paginate_wrapped_rest_list(
 
 
 def _rest_item_identity(node: dict[str, Any], name: str) -> tuple[str, str]:
-    for key in ("id", "sha", "filename"):
+    for key in ("id", "filename", "sha"):
         value = node.get(key)
         if isinstance(value, (int, str)):
             return key, str(value)
