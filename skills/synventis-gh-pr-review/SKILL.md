@@ -76,8 +76,11 @@ responsible owner resolves a material conflict.
 
 For a bug or regression fix, require the authoritative Jira acceptance criteria to name the
 automated regression-test requirement. With no Jira, require it in the explicit PR contract. If it
-is absent, report an incomplete contract under `Contract blockers` and withhold the verdict. Apply
-the exception process in [review-policy.md](references/review-policy.md); never invent a waiver.
+is absent, report an incomplete contract under `Contract blockers` and withhold the skill's own
+`APPROVE` recommendation. Apply the contract-exception and human-override rules in
+[Tests and CI](references/review-policy.md#tests-and-ci); never invent a waiver. A valid human
+test-gap override changes only an explicitly directed GitHub event, not the skill assessment or any
+other review gate.
 
 ## 4. Inspect and validate candidates
 
@@ -149,15 +152,21 @@ Map the recommendation to GitHub as follows:
 - `COMMENT`: the review is provisional, contract verification is blocked, or material questions
   remain without a verified blocker.
 
-Never approve conditionally while listing required pre-merge work. Allow clearly non-blocking open
-questions or suggestions, but not stale findings, unprocessed disputes, or unmet blockers.
+The recommended verdict and submitted event must match except for the
+[human test-gap override](references/review-policy.md#human-test-gap-override). Under that override,
+keep the skill recommendation at `COMMENT` with required regression coverage missing, and report the
+human-directed `APPROVE` event separately with its accepted risk. This is not a conditional skill
+approval. Otherwise, never approve conditionally while listing required pre-merge work. Allow
+clearly non-blocking open questions or suggestions, but not stale findings, unprocessed disputes, or
+unmet blockers.
 
 ## 7. Mutate only when authorized
 
-Follow [github-workflow.md](references/github-workflow.md) exactly. Refetch the PR, Jira, checks,
-effective diff, pending reviews, and thread state immediately before mutation. A changed head,
-effective base, contract, or material context invalidates prior authorization; reassess and obtain
-renewed authorization.
+Follow [github-workflow.md](references/github-workflow.md) exactly, including the
+[human test-gap workflow](references/github-workflow.md#apply-a-human-test-gap-override). Refetch the
+PR, Jira, checks, effective diff, pending reviews, and thread state immediately before mutation. A
+changed head, effective base, contract, check state, or material conversation invalidates prior
+authorization; reassess and obtain renewed authorization.
 
 Default to presenting exact proposed comments, replies, resolutions, review event, assignee changes,
 and reviewer changes before executing. Treat reply and resolution as separate mutations. Batch

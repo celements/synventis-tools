@@ -6,6 +6,7 @@
 - [Inspect the pinned change locally](#inspect-the-pinned-change-locally)
 - [Select a follow-up baseline](#select-a-follow-up-baseline)
 - [Prepare mutations](#prepare-mutations)
+- [Apply a human test-gap override](#apply-a-human-test-gap-override)
 - [Apply authorized mutations](#apply-authorized-mutations)
 - [Handle partial failure](#handle-partial-failure)
 
@@ -98,6 +99,24 @@ the user explicitly requests that action and has appropriate authority.
 Do not add an AI signature or agent branding. Match the established language of the PR or thread
 unless the user requests another language. Keep public PR text technical; keep apology, motives, and
 process discussion in a separately requested private-channel draft.
+
+## Apply a human test-gap override
+
+Normally the submitted review event must match the skill's recommendation. The sole exception is an
+explicit human direction to submit `APPROVE` despite a missing regression test imposed only by the
+skill. Before applying it:
+
+1. Verify every eligibility and authority condition in the
+   [human test-gap override](review-policy.md#human-test-gap-override). Any other blocker, material
+   uncertainty, or failed gate forbids the override.
+2. Refetch the complete snapshot and authoritative contract. Do not mutate if the head, effective
+   base, contract, checks, or material conversation changed; reassess and obtain renewed explicit
+   direction.
+3. Put the missing test scenario and the human's acceptance of its risk as non-blocking in the
+   `APPROVE` body.
+4. Preserve the pending-review and self-review gates and every other mutation rule below.
+5. After readback, report the skill's withheld approval recommendation separately from the
+   human-directed `APPROVE` event.
 
 ## Apply authorized mutations
 

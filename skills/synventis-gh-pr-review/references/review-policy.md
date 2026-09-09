@@ -125,6 +125,36 @@ alternative validation strategy and rationale in the PR. With linked Jira, the r
 owner must also accept the exception in the authoritative contract. Withhold the verdict while the
 PR and contract conflict.
 
+This documented contract exception is the route by which the skill may independently recommend
+`APPROVE`. It is not required when a human reviewer explicitly owns a test gap imposed only by this
+skill under the following override.
+
+### Human test-gap override
+
+A human-directed GitHub event may depart from the skill assessment only for required regression
+coverage imposed solely by this skill. The override does not make the coverage adequate or cause the
+skill to recommend `APPROVE`. Require all of the following:
+
+1. No verified code blocker, material uncertainty, or unmet requirement remains beyond the
+   skill-imposed test gap.
+2. Jira acceptance criteria, repository or organization policy, and every other authoritative
+   contract do not explicitly require the test. If one does, its responsible owner must change the
+   contract before approval.
+3. The human reviewer has authority to accept the risk for the affected scope and explicitly directs
+   the exact `APPROVE` event despite the identified gap, or explicitly directs that the gap be
+   included in that approval's body. A review request, general positive wording, or prior approval
+   intent is insufficient.
+4. The direction applies to the current head, base, contract, checks, and material conversation. Any
+   change requires reassessment and renewed explicit direction.
+5. The approval body visibly names the missing test scenario and records it as a human-accepted,
+   non-blocking improvement or risk. Never omit or disguise the gap.
+
+The override cannot bypass incomplete GitHub or Jira retrieval, draft or WIP handling, merge
+conflicts, self-review restrictions, a closed or merged PR, an existing pending review, or any other
+mutation or authorization rule. Report the two outcomes separately: `Skill assessment: required
+regression coverage missing` and `GitHub event: APPROVE at explicit human direction; test risk
+documented`.
+
 Treat CI state as evidence, not a code finding. A change-caused failure is a blocker. A verified
 unrelated infrastructure failure need not prevent approval. Withhold approval when required
 validation has not run and the uncertainty could hide a blocker.
