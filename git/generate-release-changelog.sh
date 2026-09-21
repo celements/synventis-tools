@@ -32,7 +32,7 @@ github_repo() {
 }
 
 inspect_repo() {
-  local dir=$1 slug remote_tags tag_sha tag_commit baseline commits count full_sha short_sha date subject title pr
+  local dir=$1 slug remote_tags tag_sha tag_commit baseline commits count commit_label full_sha short_sha date subject title pr
   local -a tag_shas bases tag_bases unique_bases
   slug=$(github_repo "$(git -C "$dir" remote get-url origin)") || return 0
   [ -z "${seen[$slug]+x}" ] || return 0
@@ -57,9 +57,11 @@ inspect_repo() {
   commits=$(git -C "$dir" rev-list "$baseline..origin/dev")
   [ -n "$commits" ] || return 0
   count=$(printf '%s\n' "$commits" | wc -l)
-  printf '### %s\n' "${slug##*/}"
-  printf -- '- **Branch:** `origin/dev` | **Release:** `%s` | **Baseline:** [`%s`](https://github.com/%s/commit/%s) | **Total Commits:** %s\n\n' \
-    "$release" "${baseline:0:8}" "$slug" "$baseline" "$count"
+  commit_label=commits
+  [ "$count" -ne 1 ] || commit_label=commit
+  printf '### %s (%s %s)\n\n' "${slug##*/}" "$count" "$commit_label"
+  printf -- '- **%s:** [`%s`](https://github.com/%s/commit/%s)\n' \
+    "${slug##*/}" "${baseline:0:8}" "$slug" "$baseline" >> "$baseline_report"
   while read -r full_sha; do
     short_sha=${full_sha:0:8}
     IFS=$'\t' read -r date subject < <(git -C "$dir" show -s --format='%cs%x09%s' "$full_sha")
@@ -122,7 +124,8 @@ gh auth status >/dev/null 2>&1 || die 'gh is not authenticated'
 declare -A seen=()
 repo_count=0
 report=$(mktemp)
-trap 'rm -f "$report"' EXIT
+baseline_report=$(mktemp)
+trap 'rm -f "$report" "$baseline_report"' EXIT
 {
   printf '# Changelog since release %s\n\n' "$release"
   printf 'Compared with current `origin/dev`.\n\n'
@@ -131,6 +134,8 @@ trap 'rm -f "$report"' EXIT
     git -C "$dir" rev-parse --git-dir >/dev/null 2>&1 || continue
     inspect_repo "$dir"
   done
+  printf '## Baselines\n\n'
+  cat "$baseline_report"
 } > "$report"
 
 [ "$repo_count" -gt 0 ] || die "no changes found after release $release in $workspace"
