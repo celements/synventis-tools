@@ -1,4 +1,0 @@
-interface:
-  display_name: "Celements Struct"
-  short_description: "Structured editor and table layouts in Celements"
-  default_prompt: "Use $celements-struct when working with Celements structured editor layouts, struct field page types, object filters, tables, or autocomplete."
