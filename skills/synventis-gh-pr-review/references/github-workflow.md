@@ -21,8 +21,11 @@ python3 <skill-directory>/scripts/fetch_pr_context.py OWNER/REPOSITORY#NUMBER
 The script uses authenticated `gh api` calls, emits one JSON document to stdout, and performs no
 mutation. It collects normalized PR state, exact base and head SHAs, authenticated viewer, commits,
 changed-file metadata, checks and statuses, reviews, top-level comments, labels, assignees, requested
-reviewers, and every review thread and reply with current resolved and outdated state. It records a
-schema version, timestamp, page and item counts, and start/end snapshot fingerprints.
+reviewers, and every review thread and reply with current resolved and outdated state. For more than
+250 PR commits, it reads the exact `base..head` range with Git in an ephemeral bare repository. If
+Git cannot provide that range, it uses the paginated commit-comparison API. It verifies either result
+against GitHub's reported PR commit count. The output records each collection's source, page and item
+counts, plus schema version, timestamp, and start/end snapshot fingerprints.
 
 Treat a nonzero exit as no usable snapshot. Do not salvage partial stdout or bypass the failure with
 an unpaginated command. Keep fetched bodies ephemeral by default; never persist credentials. A

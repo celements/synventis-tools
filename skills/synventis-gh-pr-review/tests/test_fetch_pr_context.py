@@ -102,6 +102,23 @@ def review_thread(index, comments=None, has_next=False, cursor=None, total_count
     }
 
 
+def commit_node(index):
+    sha = f"sha-{index:03d}"
+    parent = [] if index == 0 else [{"sha": f"sha-{index - 1:03d}"}]
+    return {
+        "sha": sha,
+        "html_url": f"https://example.invalid/commit/{sha}",
+        "commit": {
+            "message": f"commit {index}",
+            "author": {"date": "2026-01-01T00:00:00Z"},
+            "committer": {"date": "2026-01-01T00:00:00Z"},
+        },
+        "author": {"login": "author"},
+        "committer": {"login": "committer"},
+        "parents": parent,
+    }
+
+
 class PullRequestTargetTest(unittest.TestCase):
     def test_parses_reference(self):
         target = fetch_pr_context.PullRequestTarget.parse("acme/widgets#42")
@@ -306,6 +323,151 @@ class PaginationTest(unittest.TestCase):
                 0,
                 lambda node: node,
             )
+
+
+class CommitCollectionTest(unittest.TestCase):
+    def setUp(self):
+        self.target = fetch_pr_context.PullRequestTarget.parse("acme/widgets#42")
+        self.pull_request = {
+            "base": {"ref": "main", "sha": "base-sha"},
+            "head": {"ref": "feature", "sha": "head-sha"},
+        }
+
+    def test_uses_pull_request_endpoint_through_250_commits(self):
+        client = FakeRestClient([[commit_node(0), commit_node(1)]])
+
+        commits, completeness = fetch_pr_context._fetch_commits(
+            client,
+            self.target,
+            self.pull_request,
+            2,
+        )
+
+        self.assertEqual(2, len(commits))
+        self.assertEqual("pull_request_api", completeness["source"])
+        self.assertEqual(
+            "repos/acme/widgets/pulls/42/commits",
+            client.calls[0][0],
+        )
+
+    def test_prefers_git_for_more_than_250_commits(self):
+        git_commits = [commit_node(index) for index in range(251)]
+        git_completeness = {
+            "expected_items": 251,
+            "retrieved_items": 251,
+            "pages": 0,
+            "source": "git",
+        }
+        client = FakeRestClient([])
+        with patch.object(
+            fetch_pr_context,
+            "_collect_commits_with_git",
+            return_value=(git_commits, git_completeness),
+        ) as collect_with_git:
+            commits, completeness = fetch_pr_context._fetch_commits(
+                client,
+                self.target,
+                self.pull_request,
+                251,
+            )
+
+        self.assertEqual(251, len(commits))
+        self.assertEqual("git", completeness["source"])
+        self.assertEqual([], client.calls)
+        collect_with_git.assert_called_once_with(self.target, self.pull_request, 251)
+
+    def test_falls_back_to_paginated_compare_api_when_git_is_unavailable(self):
+        responses = [
+            {"total_commits": 251, "commits": [commit_node(index) for index in range(100)]},
+            {
+                "total_commits": 251,
+                "commits": [commit_node(index) for index in range(100, 200)],
+            },
+            {
+                "total_commits": 251,
+                "commits": [commit_node(index) for index in range(200, 251)],
+            },
+        ]
+        client = FakeRestClient(responses)
+        with patch.object(
+            fetch_pr_context,
+            "_collect_commits_with_git",
+            side_effect=fetch_pr_context.LocalGitUnavailable("git CLI is unavailable"),
+        ):
+            commits, completeness = fetch_pr_context._fetch_commits(
+                client,
+                self.target,
+                self.pull_request,
+                251,
+            )
+
+        self.assertEqual(251, len(commits))
+        self.assertEqual("compare_api", completeness["source"])
+        self.assertEqual(3, completeness["pages"])
+        self.assertEqual("git CLI is unavailable", completeness["git_fallback_reason"])
+        self.assertEqual([1, 2, 3], [call[1]["page"] for call in client.calls])
+        self.assertEqual(
+            {"repos/acme/widgets/compare/base-sha...head-sha"},
+            {call[0] for call in client.calls},
+        )
+
+    def test_compare_api_fails_closed_when_count_does_not_match(self):
+        client = FakeRestClient([{"total_commits": 250, "commits": [commit_node(0)]}])
+        with patch.object(
+            fetch_pr_context,
+            "_collect_commits_with_git",
+            side_effect=fetch_pr_context.LocalGitUnavailable("git CLI is unavailable"),
+        ), self.assertRaisesRegex(fetch_pr_context.RetrievalError, "expected 251"):
+            fetch_pr_context._fetch_commits(
+                client,
+                self.target,
+                self.pull_request,
+                251,
+            )
+
+    def test_git_collector_fetches_pinned_refs_and_reads_exact_range(self):
+        base_sha = "b" * 40
+        first_sha = "1" * 40
+        head_sha = "h" * 40
+        pull_request = {
+            "base": {"ref": "main", "sha": base_sha},
+            "head": {"ref": "feature", "sha": head_sha},
+        }
+        git_output = "\0".join(
+            [
+                first_sha,
+                base_sha,
+                "2026-01-01T00:00:00+00:00",
+                "2026-01-01T00:00:00+00:00",
+                "first commit\n",
+                head_sha,
+                first_sha,
+                "2026-01-02T00:00:00+00:00",
+                "2026-01-02T00:00:00+00:00",
+                "second commit\n",
+            ]
+        )
+        with patch.object(
+            fetch_pr_context.shutil,
+            "which",
+            return_value="/usr/bin/git",
+        ), patch.object(
+            fetch_pr_context,
+            "_run_git",
+            side_effect=["", "", f"{base_sha}\n", f"{head_sha}\n", git_output],
+        ) as run_git:
+            commits, completeness = fetch_pr_context._collect_commits_with_git(
+                self.target,
+                pull_request,
+                2,
+            )
+
+        self.assertEqual([first_sha, head_sha], [commit["sha"] for commit in commits])
+        self.assertEqual("second commit", commits[-1]["message"])
+        self.assertEqual("git", completeness["source"])
+        fetch_arguments = run_git.call_args_list[1].args[0]
+        self.assertIn("+refs/heads/main:refs/synventis/base", fetch_arguments)
+        self.assertIn("+refs/pull/42/head:refs/synventis/head", fetch_arguments)
 
 
 class FailClosedCliTest(unittest.TestCase):

@@ -5,9 +5,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -17,10 +20,15 @@ from urllib.parse import urlparse
 SCHEMA_VERSION = "1.0"
 PAGE_SIZE = 100
 MAX_PAGES = 10_000
+PULL_REQUEST_COMMIT_LIMIT = 250
 
 
 class RetrievalError(RuntimeError):
     """Raised when a complete, internally consistent snapshot cannot be produced."""
+
+
+class LocalGitUnavailable(RuntimeError):
+    """Raised when the exact PR commit range cannot be collected with local Git."""
 
 
 @dataclass(frozen=True)
@@ -1046,6 +1054,216 @@ def _normalize_commit(node: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _paginate_compare_commits(
+    client: GhClient,
+    endpoint: str,
+    expected_count: int,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    commits: list[dict[str, Any]] = []
+    page = 1
+    seen_shas: set[str] = set()
+    while True:
+        if page > MAX_PAGES:
+            raise RetrievalError("Exceeded pagination limit for compared commits")
+        response = _require_dict(
+            client.rest(endpoint, {"per_page": PAGE_SIZE, "page": page}),
+            "commit comparison",
+        )
+        total_commits = response.get("total_commits")
+        if total_commits != expected_count:
+            raise RetrievalError(
+                "Compared commit count changed or is incomplete: "
+                f"expected {expected_count}, got {total_commits}"
+            )
+        nodes = _require_list(response.get("commits"), "commit comparison.commits")
+        for raw_node in nodes:
+            node = _require_dict(raw_node, "compared commit")
+            sha = node.get("sha")
+            if not isinstance(sha, str):
+                raise RetrievalError("Compared commit has no SHA")
+            if sha in seen_shas:
+                raise RetrievalError(f"Duplicate compared commit: {sha}")
+            seen_shas.add(sha)
+            commits.append(_normalize_commit(node))
+        if len(commits) >= expected_count or len(nodes) < PAGE_SIZE:
+            break
+        page += 1
+    if len(commits) != expected_count:
+        raise RetrievalError(
+            "Compared commits are incomplete: "
+            f"expected {expected_count}, got {len(commits)}"
+        )
+    return commits, {
+        "expected_items": expected_count,
+        "retrieved_items": len(commits),
+        "pages": page,
+        "source": "compare_api",
+    }
+
+
+def _run_git(arguments: list[str]) -> str:
+    environment = os.environ.copy()
+    environment["GIT_TERMINAL_PROMPT"] = "0"
+    try:
+        result = subprocess.run(
+            ["git", *arguments],
+            text=True,
+            capture_output=True,
+            check=False,
+            env=environment,
+        )
+    except FileNotFoundError as error:
+        raise LocalGitUnavailable("git CLI is unavailable") from error
+    if result.returncode != 0:
+        failure = _redact_error(result.stderr or result.stdout)
+        raise LocalGitUnavailable(f"git command failed: {failure or 'unknown failure'}")
+    return result.stdout
+
+
+def _read_commit_range_with_git(
+    repository: str,
+    target: PullRequestTarget,
+    base_sha: str,
+    head_sha: str,
+    expected_count: int,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    output = _run_git(
+        [
+            "-C",
+            repository,
+            "log",
+            "--reverse",
+            "--topo-order",
+            "-z",
+            "--format=format:%H%x00%P%x00%aI%x00%cI%x00%B",
+            f"{base_sha}..{head_sha}",
+        ]
+    )
+    fields = output.split("\0")
+    if fields and not fields[-1]:
+        fields.pop()
+    field_count = 5
+    if len(fields) % field_count:
+        raise LocalGitUnavailable("git returned malformed commit metadata")
+    commits = []
+    for index in range(0, len(fields), field_count):
+        sha, parents, authored_at, committed_at, message = fields[index : index + field_count]
+        commits.append(
+            {
+                "sha": sha,
+                "url": (
+                    f"https://{target.hostname}/{target.owner}/{target.repository}/commit/{sha}"
+                ),
+                "message": message.rstrip("\n"),
+                "authored_at": authored_at,
+                "committed_at": committed_at,
+                "author": None,
+                "committer": None,
+                "parents": parents.split(),
+            }
+        )
+    commit_shas = [commit["sha"] for commit in commits]
+    if len(commit_shas) != len(set(commit_shas)):
+        raise LocalGitUnavailable("git returned duplicate commits")
+    if len(commits) != expected_count:
+        raise LocalGitUnavailable(
+            f"git commit range has {len(commits)} commits; expected {expected_count}"
+        )
+    if commits and commits[-1]["sha"] != head_sha:
+        raise LocalGitUnavailable("git commit range does not end at the expected head")
+    return commits, {
+        "expected_items": expected_count,
+        "retrieved_items": len(commits),
+        "pages": 0,
+        "source": "git",
+    }
+
+
+def _collect_commits_with_git(
+    target: PullRequestTarget,
+    pull_request: dict[str, Any],
+    expected_count: int,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    if shutil.which("git") is None:
+        raise LocalGitUnavailable("git CLI is unavailable")
+    base = _require_dict(pull_request.get("base"), "pull request base")
+    head = _require_dict(pull_request.get("head"), "pull request head")
+    base_ref = base.get("ref")
+    base_sha = base.get("sha")
+    head_sha = head.get("sha")
+    if not all(isinstance(value, str) for value in (base_ref, base_sha, head_sha)):
+        raise RetrievalError("GitHub response is missing the PR base or head ref")
+    remote_url = f"https://{target.hostname}/{target.owner}/{target.repository}.git"
+    with tempfile.TemporaryDirectory(prefix="synventis-pr-commits-") as repository:
+        _run_git(["init", "--bare", "--quiet", repository])
+        _run_git(
+            [
+                "-c",
+                "credential.helper=!gh auth git-credential",
+                "-C",
+                repository,
+                "fetch",
+                "--quiet",
+                "--no-tags",
+                "--filter=blob:none",
+                remote_url,
+                f"+refs/heads/{base_ref}:refs/synventis/base",
+                f"+refs/pull/{target.number}/head:refs/synventis/head",
+            ]
+        )
+        fetched_base = _run_git(
+            ["-C", repository, "rev-parse", "--verify", "refs/synventis/base^{commit}"]
+        ).strip()
+        fetched_head = _run_git(
+            ["-C", repository, "rev-parse", "--verify", "refs/synventis/head^{commit}"]
+        ).strip()
+        if fetched_base != base_sha or fetched_head != head_sha:
+            raise RetrievalError("Pull-request base or head changed during Git commit retrieval")
+        return _read_commit_range_with_git(
+            repository,
+            target,
+            base_sha,
+            head_sha,
+            expected_count,
+        )
+
+
+def _fetch_commits(
+    client: GhClient,
+    target: PullRequestTarget,
+    pull_request: dict[str, Any],
+    expected_count: int,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    if expected_count <= PULL_REQUEST_COMMIT_LIMIT:
+        commits, completeness = _paginate_rest_list(
+            client,
+            f"repos/{target.owner}/{target.repository}/pulls/{target.number}/commits",
+            "commits",
+            expected_count,
+            _normalize_commit,
+        )
+        return commits, {**completeness, "source": "pull_request_api"}
+    base = _require_dict(pull_request.get("base"), "pull request base")
+    head = _require_dict(pull_request.get("head"), "pull request head")
+    base_sha = base.get("sha")
+    head_sha = head.get("sha")
+    if not isinstance(base_sha, str) or not isinstance(head_sha, str):
+        raise RetrievalError("GitHub response is missing the PR base or head SHA")
+    try:
+        return _collect_commits_with_git(target, pull_request, expected_count)
+    except LocalGitUnavailable as error:
+        endpoint = (
+            f"repos/{target.owner}/{target.repository}/compare/{base_sha}...{head_sha}"
+        )
+        commits, completeness = _paginate_compare_commits(
+            client,
+            endpoint,
+            expected_count,
+        )
+        completeness["git_fallback_reason"] = _redact_error(str(error))
+        return commits, completeness
+
+
 def _normalize_file(node: dict[str, Any]) -> dict[str, Any]:
     return {
         "path": node.get("filename"),
@@ -1171,12 +1389,11 @@ def collect_context(target: PullRequestTarget, client: GhClient | None = None) -
         pull_request_id,
         counts["reviewThreads"],
     )
-    commits, completeness["commits"] = _paginate_rest_list(
+    commits, completeness["commits"] = _fetch_commits(
         api,
-        f"repos/{target.owner}/{target.repository}/pulls/{target.number}/commits",
-        "commits",
+        target,
+        pull_request,
         counts["commits"],
-        _normalize_commit,
     )
     files, completeness["files"] = _paginate_rest_list(
         api,
