@@ -14,6 +14,8 @@ integration, and install scope.
 - `celements-struct`: guidance for structured editor fields, object lists, and tables.
 - `celements-velocity`: guidance for Celements Velocity 1.7 server-side rendering and integration.
 - `lambda-exception-util`: guidance for handling checked exceptions in lambdas.
+- `synventis-gh-pr-review`: evidence-led GitHub PR review and reassessment for Synventis,
+  Celements, and ProgOnline repositories.
 - `synventis-vue-style`: coding and verification conventions for Synventis Vue frontends.
 
 ## Install
