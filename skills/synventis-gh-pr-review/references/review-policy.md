@@ -56,10 +56,23 @@ Require each finding to state:
 - location;
 - factual status;
 - concrete failure scenario and evidence;
+- behavior classification and baseline evidence, with the test requirement and its basis;
 - impact and likelihood in the actual operating model;
 - derived risk;
 - merge disposition and current-PR scope;
 - smallest viable behavioral remedy, while allowing an equivalent implementation.
+
+For behavioral findings, use `repairing an established defect`, `correcting new behavior`, or
+`preventing a regression in established behavior` as defined in [Tests and CI](#tests-and-ci).
+Include this distinction and its testing consequence in the initial inline comment, or in the
+finding itself when no honest inline anchor exists. Cite the established behavior or explain that
+the affected functionality is first introduced by this change. State whether coverage is mandatory
+under this skill, explicitly required by contract or policy, justified by concrete risk, or optional.
+Name the scenario and any existing coverage that satisfies the requirement. Keep this concise and
+do not force a behavioral classification onto a purely non-behavioral finding.
+
+Do not add a test gate merely because the author fixes the finding. If new evidence changes the
+classification or testing requirement, explain the change through reassessment.
 
 Use these factual states:
 
@@ -104,14 +117,30 @@ Run focused existing tests and targeted reproductions sufficient for the changed
 require production-scale deployment, load, or browser validation for manual or research work unless
 the contract or actual risk requires it.
 
-Report missing tests only when required by contract or repository policy, or when a concrete changed
-behavior with meaningful regression risk lacks practical verification. Name the missing scenario.
+Classify the affected behavior before deciding whether the mandatory regression-test rule applies:
 
-Treat a change as a bug or regression fix when Jira uses the `Bug` issue type, the recorded contract
-describes defective or regressed behavior, or the change clearly restores intended behavior. Ask the
-responsible owner when these signals conflict.
+| Classification | Evidence | Mandatory regression-test rule |
+| --- | --- | --- |
+| Repairing an established defect | The change repairs a defect in behavior established outside the change under review, including a longstanding bug that never worked correctly. | Applies. |
+| Correcting new behavior | The defect is confined to functionality first introduced by the unmerged change and conflicts with no established behavior. | Does not automatically apply. |
+| Preventing a regression in established behavior | The change breaks or would break established behavior, even if discovered and corrected before merge. | Applies. |
 
-For every bug or regression fix:
+Establish the baseline from released, deployed, supported, or previously accepted behavior and its
+contract. An earlier commit in the same unmerged feature does not by itself establish that baseline.
+Branch merge status, a Jira `Bug` type, a "bug fix" description, or a review finding alone does not
+decide the classification. Assess each affected behavior separately in mixed or connected changes.
+If the baseline is uncertain, investigate and report the uncertainty; ask the responsible owner only
+when the remaining ambiguity could change the verdict.
+
+For corrections to new behavior, assess testing against the feature contract, actual risk, existing
+coverage, and practical verification options. Do not require a new regression test, rewrite of
+acceptance criteria, or test-gap waiver solely because a development defect was corrected. Explicit
+issue, repository, and organization requirements remain binding. Security, data-loss, or complex
+behavior may justify additional retained automated coverage before first merge; identify the
+concrete failure scenario and explain why existing verification is insufficient. Classify a missing
+test's merge effect from that evidence, rather than treating all new behavior as exempt from testing.
+
+When the mandatory regression-test rule applies:
 
 1. Require the authoritative contract to name an automated regression test as acceptance criteria.
 2. Require a focused test that exercises the reported failure and would fail on the broken behavior.
@@ -120,10 +149,15 @@ For every bug or regression fix:
 5. Where safely practical, run the test on the fixed head and against the broken behavior in an
    isolated checkout. Otherwise require credible red/green evidence and state the limitation.
 
-Do not invent an exception. The PR author must explain why automation is impractical and record the
-alternative validation strategy and rationale in the PR. With linked Jira, the responsible issue
-owner must also accept the exception in the authoritative contract. Withhold the verdict while the
-PR and contract conflict.
+Do not invent an exception to this mandatory rule. The PR author must explain why automation is
+impractical and record the alternative validation strategy and rationale in the PR. With linked
+Jira, the responsible issue owner must also accept the exception in the authoritative contract.
+Withhold the verdict while the PR and contract conflict.
+
+Report freshly executed checks, retained automated coverage, and deployment validation separately.
+A successful one-time reproduction is evidence for the current correction, not retained protection
+against future failures. Existing automated coverage can satisfy the requirement without a new test
+per correction when it explicitly exercises the failure scenario.
 
 This documented contract exception is the route by which the skill may independently recommend
 `APPROVE`. It is not required when a human reviewer explicitly owns a test gap imposed only by this

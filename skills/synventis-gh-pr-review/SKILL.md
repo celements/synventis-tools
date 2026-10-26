@@ -68,19 +68,24 @@ Determine and state:
 - the maturity lens: automated production path, supported operational tooling, manual or
   best-effort helper, experimental or initial-research foundation, or an evidenced mixture;
 - the actual deployment, threat, cardinality, source-of-truth, and accepted-risk model;
-- whether the change is a bug or regression fix and therefore subject to the mandatory test gate.
+- which behavior is established and which is introduced by this change, and whether each correction
+  repairs an established defect, corrects new behavior, or prevents a regression in established
+  behavior under [Tests and CI](references/review-policy.md#tests-and-ci).
 
 Repository and organization safety or coding policies remain binding. Do not silently choose
 between conflicting Jira acceptance criteria and PR scope. Withhold the verdict until the
 responsible owner resolves a material conflict.
 
-For a bug or regression fix, require the authoritative Jira acceptance criteria to name the
-automated regression-test requirement. With no Jira, require it in the explicit PR contract. If it
-is absent, report an incomplete contract under `Contract blockers` and withhold the skill's own
-`APPROVE` recommendation. Apply the contract-exception and human-override rules in
-[Tests and CI](references/review-policy.md#tests-and-ci); never invent a waiver. A valid human
-test-gap override changes only an explicitly directed GitHub event, not the skill assessment or any
-other review gate.
+Apply the mandatory regression-test rule only to repairs of established defects and prevention of
+regressions in established behavior. For those cases, require the authoritative Jira acceptance
+criteria to name the automated regression-test requirement, or the explicit PR contract when there
+is no Jira. If absent, report an incomplete contract under `Contract blockers` and withhold the
+skill's own `APPROVE` recommendation. Correcting new behavior that conflicts with no established
+behavior does not itself create this gate or require an acceptance-criteria amendment; explicit
+contract and repository test requirements still apply. Apply the contract-exception and
+human-override rules in [Tests and CI](references/review-policy.md#tests-and-ci); never invent a
+waiver. A valid human test-gap override changes only an explicitly directed GitHub event, not the
+skill assessment or any other review gate.
 
 ## 4. Inspect and validate candidates
 
@@ -97,6 +102,11 @@ For every candidate, independently verify all of the following before calling it
 5. The behavior violates the understood contract.
 6. The proposed outcome belongs in this PR.
 7. A smallest viable behavioral remedy exists.
+
+In the initial comment for each behavioral finding, state its behavior classification, the evidence
+for the established or new behavior, and the resulting test requirement and its basis. Use the
+[finding schema](references/review-policy.md#finding-evidence-and-classification); do not wait until
+the correction is implemented to introduce a test requirement.
 
 Keep unverified concerns in `Questions` or `Validation limitations`, never in `Findings`. Exclude
 style-only, speculative, pre-existing, and automatically enforced lint or CI observations. Treat

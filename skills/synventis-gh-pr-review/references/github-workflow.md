@@ -91,6 +91,12 @@ Prefer a valid line-anchored inline comment for each concrete code finding. Use 
 for the verdict, a cross-cutting issue with no honest anchor, and validation limitations. Do not
 duplicate a finding inline and in the summary.
 
+Each initial behavioral finding comment must already identify the behavior classification, baseline
+evidence, and testing consequence from the
+[finding schema](review-policy.md#finding-evidence-and-classification). Do not defer those details
+to the review summary or introduce a mandatory test merely because the finding was corrected.
+Explain any later evidence-based change through reassessment.
+
 Batch validated initial comments into one review with exactly one event: `APPROVE`,
 `REQUEST_CHANGES`, or `COMMENT`. Put follow-up replies in their existing threads. Treat posting a
 reply and resolving a thread as separate mutations. Correct materially wrong prior claims with a
