@@ -1,0 +1,4 @@
+interface:
+  display_name: "Synventis GitHub PR Review"
+  short_description: "Evidence-led GitHub PR review and reassessment"
+  default_prompt: "Use $synventis-gh-pr-review to review this pull request against its live Jira contract and current GitHub threads."

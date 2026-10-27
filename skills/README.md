@@ -10,6 +10,8 @@ Reusable Celements development guidance, installed through the npm-based [`skill
 - `celements-struct`: Celements structured editor fields, layouts, object lists, and tables.
 - `celements-velocity`: Apache Velocity templates and Celements integration.
 - `lambda-exception-util`: Checked exceptions in Java lambdas with `LambdaExceptionUtil`.
+- `synventis-gh-pr-review`: evidence-led GitHub PR review and reassessment for Synventis,
+  Celements, and ProgOnline repositories.
 - `synventis-vue-style`: Vue and TypeScript conventions for Synventis, Celements, and Progon projects.
 
 ## Install
