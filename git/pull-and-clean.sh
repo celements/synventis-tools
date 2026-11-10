@@ -50,19 +50,21 @@ joinAsync() {
 
 ## does the following process for for a git repository '$1':
 ## 1. tries switching to any base branch
-## 2. pull the remote repository
-## 3. pruning remote branches from 'origin'
-## 4. deleting local branches gone from remote
+## 2. pulls the current base branch
+## 3. prunes remote branches from 'origin'
+## 4. deletes local branches whose upstream is gone
 cleanBranches() {
-  IFS='|'
-  for b in $baseBranches; do
-    [ "$1" ] && [ -d "$1/.git" ] && [ "$b" ] \
-      && git -C "$1" switch "$b" > /dev/null 2>&1 \
-      && git -C "$1" pull        > /dev/null 2>&1 \
-      && git -C "$1" fetch origin --prune \
-      && git -C "$1" branch -vv | grep -E '\[origin/.*: gone\]' \
-        | awk '{print $1}' | grep -Ev "(^\*|${baseBranches})" \
-        | xargs --no-run-if-empty git -C "$1" branch --delete --force \
+  [ "$1" ] && [ -d "$1/.git" ] || return 1
+  local -a git=(git -C "$1")
+  local IFS='|'
+  local branch
+  for branch in $baseBranches
+      do "${git[@]}" switch "$branch" > /dev/null 2>&1 \
+      && "${git[@]}" pull > /dev/null 2>&1 \
+      && "${git[@]}" fetch origin --prune \
+      && "${git[@]}" for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
+        | awk '$2 == "[gone]" { print $1 }' \
+        | xargs --no-run-if-empty "${git[@]}" branch --delete --force \
       && return 0
   done
   return $?
