@@ -18,16 +18,26 @@ inspection and formatting workflows.
 
 ## Local Webapp
 
-Run [`webapp/up.sh`](webapp/up.sh) from the webapp project root to build the exploded WAR,
-start `compose.local.yml`, and watch frontend and backend sources:
+Run these commands from the webapp project root.
+
+### webapp-up
+
+Builds the exploded WAR, starts containers and watches sources:
 
 ```bash
 ../synventis-tools/webapp/up.sh
 ../synventis-tools/webapp/up.sh --mvn-startup="-U install" --mvn-watch="prepare-package"
 ```
 
-Requires Maven, Docker Compose, and watchexec. Frontend watching uses `npm run dev` when a
-`package.json` exists.
+### webapp-mysql
+
+Opens a root DB session using the container password; `upgrade` runs `mariadb-upgrade`:
+
+```bash
+../synventis-tools/webapp/mysql.sh
+../synventis-tools/webapp/mysql.sh -e "SHOW DATABASES"
+../synventis-tools/webapp/mysql.sh upgrade
+```
 
 ## Agent Skills
 
