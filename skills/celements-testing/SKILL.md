@@ -1,15 +1,29 @@
 ---
 name: celements-testing
-description: Use for Celements or Progon JUnit and EasyMock tests involving the component container, XWiki APIs, Spring wiring, component mocks, or AbstractComponentTest.
+description: Use when planning, implementing, refactoring, or reviewing Celements or Progon JUnit and EasyMock tests, including tests involving the component container, XWiki APIs, Spring wiring, component mocks, or AbstractComponentTest.
 ---
 
 # Celements Testing
 
-Use `com.celements.common.test.AbstractComponentTest` when a Celements or Progon test depends on the component container, XWiki APIs, Spring wiring, or component mocks. Test public method behavior directly; use `MockMvc` or annotation tests only when the requested subject is the HTTP or MVC layer.
+Prefer isolated unit tests of one real class with mocked application collaborators. Use real value objects and preserve required test-harness infrastructure. Do not expand unit tests into scenarios exercising multiple real application services.
+
+Use `com.celements.common.test.AbstractComponentTest` as the unit-test harness when the subject depends on the component container, XWiki APIs, Spring wiring, or component mocks. Pure utility tests do not need this harness. Use `MockMvc` or annotation tests only when the requested subject is the HTTP or MVC layer.
+
+Add integration tests when requested or when they address a concrete gap that isolated unit tests cannot adequately establish. Keep unit and integration tests in separate classes/files, and use integration-test names supported by the project's test discovery. Do not assume `AbstractComponentTest` is an integration-test framework.
 
 The usual test dependencies are `junit:junit`, `org.easymock:easymock`, and `com.celements:celements-shared-tests`. Inspect the parent pom and neighboring tests before adding module dependencies; use parent-managed versions and add only missing test-scope artifacts.
 
-## Workflow
+## Test Design
+
+When planning, implementing, or reviewing tests, define a clear test boundary and identify useful cases covering the subject's required behavior within that boundary. For each case, ask: "What specific defect or regression would make this test fail?"
+
+Test behavior directly at an appropriate method boundary. Where useful for focused unit testing, a private method may be made package-private, or cohesive logic may be extracted into a package-private method.
+
+Name test methods `test_methodTested_testCase`. Name setup methods `prepareTest`.
+
+## Unit-Test Setup
+
+For tests requiring the unit-test harness:
 
 1. Extend `AbstractComponentTest`.
 2. Register common collaborators with `registerComponentMocks(...)` in the `@Before` method `prepareTest`.
@@ -18,8 +32,6 @@ The usual test dependencies are `junit:junit`, `org.easymock:easymock`, and `com
 5. Retrieve registered collaborators with `getMock(...)` in each test.
 6. Use `createDefaultMock(...)` for shared fixture mocks and `createMock(...)` for scenario-local mocks.
 7. Use `replayDefault(...)` and `verifyDefault(...)`, passing scenario-local mocks as arguments.
-
-Name tests `test_...` unless the project has stricter conventions.
 
 ## Components And Lookups
 
